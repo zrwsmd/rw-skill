@@ -26,7 +26,13 @@
 4. **项目配置**：创建 Remotion 项目结构
 5. **数据准备**：生成 JSON 配置文件
 6. **图片下载**：将图片保存到 public/media/ 目录
-7. **渲染视频**：运行 Remotion 渲染命令
+7. **⚠️ 关键步骤：验证图片内容**（详见 `references/strict-verification.md`）
+   - 逐一检查每张下载的图片
+   - 严格验证人名、地名、事件、时效性
+   - 确认图片内容与对应字幕高度匹配
+   - 如果不匹配，立即重新搜索和下载
+8. **渲染视频**：运行 Remotion 渲染命令
+9. **最终验证**：预览渲染后的视频，确认图文匹配度
 
 ## 核心概念
 
@@ -103,11 +109,16 @@
 - 图片必须下载到本地，不能用 URL
 - 使用免费商用图片（Pexels、Pixabay、Unsplash）
 - 图片尺寸建议 1920x1080 或更高
+- **⚠️ 关键：下载图片后必须验证内容，不能直接渲染**
+- **⚠️ 严格验证人名、地名、事件是否与图片匹配（详见 `references/strict-verification.md`）**
+- **⚠️ 优先使用项目中已验证过的图片库**
+- **⚠️ 渲染前先预览 1-2 个镜头，确认图文匹配**
 
 ## 参考文档
 
 - `references/content-splitting.md` - 内容拆分指南
 - `references/image-sourcing.md` - 图片搜索指南
+- `references/strict-verification.md` - **严格验证流程（必读）** - 人名/地名/事件/时效性验证
 - `references/visual-style.md` - 视觉风格指南
 - `scripts/ShotCard.tsx` - 镜头组件模板
 - `scripts/index.tsx` - 主组合模板
