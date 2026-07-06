@@ -20,9 +20,11 @@
 
 ### data-template.json
 视频数据结构模板，定义：
+- date: 视频对应的日期（顶部日期标注用，作为 prop 传给每个镜头，不要在组件里用 `new Date()` 现取系统时间——那样每次重新渲染同一份视频，日期都会跟着变，破坏 Remotion 要求的渲染确定性）
 - segments: 视频片段数组
 - shots: 每个片段的镜头数组
-- 图片路径、字幕、时长等配置
+  - image / subtitle / durationSeconds：基本配置
+  - focalPoint（可选，"top" | "center" | "bottom"，默认 "center"）：图片裁剪锚点。人物是画面主体、原图头部没有 headroom 时设为 "top"，避免铺满画框时把头切掉——但这只是补救手段，选图时优先找构图安全的图，见 `references/strict-verification.md` 第5节
 
 ## 使用方法
 
@@ -145,3 +147,9 @@ const enter = interpolate(frame, [0, 0.3 * fps], [0, 1], {...});
 - 图片文件是否太大（建议 < 5MB）
 - 总时长是否过长
 - 是否有语法错误
+
+### 人物头部被裁掉
+检查：
+- 原图人物头部到图片上边缘是否有留白（headroom）——没有的话优先换图
+- 是否需要给这个镜头的 shot 数据加 `"focalPoint": "top"`
+- 渲染一帧静帧实际看一下裁剪结果，不要只凭原图判断（详见 `references/strict-verification.md` 第5节）

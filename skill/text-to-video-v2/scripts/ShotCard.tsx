@@ -6,9 +6,21 @@ interface ShotProps {
   category: string;
   image: string;
   source: string;
+  date: string;
+  /** 裁剪锚点。人物是画面主体、原图头部没有留白时设为 "top"，
+   * 避免 object-fit: cover 按中心裁剪把头部切掉——但这只是补救手段，
+   * 选图时优先找 headroom 充足的构图才是根本，见 references/strict-verification.md */
+  focalPoint?: "top" | "center" | "bottom";
 }
 
-export const ShotCard: React.FC<ShotProps> = ({ subtitle, category, image, source }) => {
+export const ShotCard: React.FC<ShotProps> = ({
+  subtitle,
+  category,
+  image,
+  source,
+  date,
+  focalPoint = "center",
+}) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -49,6 +61,7 @@ export const ShotCard: React.FC<ShotProps> = ({ subtitle, category, image, sourc
           width: "100%",
           height: "100%",
           objectFit: "cover",
+          objectPosition: focalPoint === "top" ? "center top" : focalPoint === "bottom" ? "center bottom" : "center center",
           transform: `scale(${scale})`,
         }}
       />
@@ -82,7 +95,9 @@ export const ShotCard: React.FC<ShotProps> = ({ subtitle, category, image, sourc
         {category}
       </div>
 
-      {/* 顶部日期 */}
+      {/* 顶部日期 — 来自数据，而非渲染时的系统时间：
+          Remotion 要求每帧渲染必须是确定性的，new Date() 在渲染期间
+          取到的是"当前系统时间"，同一份视频重新渲染会得到不同结果 */}
       <div
         style={{
           position: "absolute",
@@ -93,7 +108,7 @@ export const ShotCard: React.FC<ShotProps> = ({ subtitle, category, image, sourc
           opacity,
         }}
       >
-        {new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+        {date}
       </div>
 
       {/* 底部字幕条 */}
