@@ -2,7 +2,7 @@
 name: ld-json-generator
 description: >
   生成 IEC 61131-3 梯形图（Ladder Diagram）专用 JSON 格式。当用户用自然语言描述梯形图逻辑时，
-  直接输出可供前端渲染器使用的 segment 数组 JSON，每个元素是一个梯级对象，含 nodesObj 拓扑。
+  直接输出可供前端渲染器使用的完整 JSON 结构，包含 segmentList、variableList 等所有字段。
   触发场景：用户描述"梯形图"、"LD程序"、"PLC逻辑"、"触点线圈"、"功能块"、"CTU/CTD/TON/TOF/TP/SR/RS"
   等关键词，或要求"生成JSON"、"转成JSON"、"写成梯形图格式"时，必须使用本 Skill。
   即使用户只是说"帮我写一段XX逻辑的梯形图"，也应使用本 Skill 输出 JSON。
@@ -16,23 +16,21 @@ description: >
 
 ## 输出结构总览
 
-**输出格式：直接输出 segment 对象数组，无任何外层包裹**
-
 ```json
-[
-  {
-    "id": "segment-xxx-xxx",
-    "label": "",
-    "note": "",
-    "height": 436,
-    "width": 1430,
-    "isExpand": true,
-    "nodesObj": { ... }
-  }
-]
+[{
+  "segmentList": [
+    { ...segment1... },
+    { ...segment2... }
+  ],
+  "variableList": [
+    { ...variable1... },
+    { ...variable2... }
+  ],
+  "pouType": "PROGRAM",
+  "pouName": "用户指定名称，未指定时默认 MAIN",
+  "extensionPath": ""
+}]
 ```
-
-**严禁输出以下字段**：`segmentList` / `variableList` / `pouType` / `pouName` / `extensionPath`
 
 > 详细字段规范见 `references/schema.md`
 > 节点类型对照见 `references/node-types.md`
@@ -104,9 +102,10 @@ FBDCompartment 的 `varName` 必须放在 `childrenNode` 内部，FBDCompartment
   "type": "FBDCompartment",
   "sourceIds": [...],
   "targetIds": [...],
-  "varName": { "value": "n", "type": "CTU" },
+  "varName": { "name": "", "value": "n", "type": "CTU", "scope": "VAR" },
   "childrenNode": {
     "type": "CTU",
+    "isFunction": false,
     "portInputs": [...],
     "portOutputs": [...]
   }
@@ -198,7 +197,42 @@ edit-node-rect.targetIds = [coil1.id, coil2.id, ...]
 }
 ```
 
-### Step 5：segment 尺寸
+### Step 5：构造 variableList
+
+收集所有节点中出现的变量，每个变量生成一条记录：
+
+```json
+{
+  "scope": "VAR",
+  "name": "变量名",
+  "type": "BOOL",
+  "initValue": "",
+  "address": "",
+  "comment": "",
+  "pathLabels": ["base", "BOOL"],
+  "id": "变量名大写",
+  "isShow": true
+}
+```
+
+**pathLabels 对照：**
+
+| 变量类型 | pathLabels |
+|---------|------------|
+| BOOL | `["base", "BOOL"]` |
+| INT  | `["base", "INT"]` |
+| TIME | `["base", "TIME"]` |
+| CTU  | `["Standard function blocks", "CTU"]` |
+| CTD  | `["Standard function blocks", "CTD"]` |
+| TON  | `["Standard function blocks", "TON"]` |
+| TOF  | `["Standard function blocks", "TOF"]` |
+| TP   | `["Standard function blocks", "TP"]` |
+| SR   | `["Standard function blocks", "SR"]` |
+| RS   | `["Standard function blocks", "RS"]` |
+
+**id 字段规则**：变量名全部大写，例如 `name: "a5"` → `id: "A5"`，`name: "myVar"` → `id: "MYVAR"`
+
+### Step 6：segment 尺寸
 
 - `height` 和 `width` 根据复杂度估算，简单梯级填 `82`/`315`，复杂梯级填 `436`/`1430` 或更大
 - `isExpand: true`（固定）
@@ -208,22 +242,26 @@ edit-node-rect.targetIds = [coil1.id, coil2.id, ...]
 
 ## 输出前自检清单（每次生成后必须逐项核对）
 
-- [ ] 顶层是纯数组，无 segmentList / variableList / pouType / pouName / extensionPath 包裹
+- [ ] 顶层是 `[{ segmentList, variableList, pouType, pouName, extensionPath }]` 结构
+- [ ] 每个 segment 的节点容器字段名是 `nodesObj`（对象），不是 `nodeDataArray`/`nodes` 等任何其他名称
+- [ ] 每个 segment 有 `edgesObj: {}`
+- [ ] `extensionPath` 固定为空字符串 `""`
 - [ ] 每个 FBDCompartment 外层**没有** varName，varName **在** childrenNode 内
 - [ ] 每个 port 条目**严格只有** name / value / scope / type 四个字段，无多余字段
 - [ ] portInputs 第一项是 EN（scope: ""），portOutputs 第一项是 ENO（scope: ""）
 - [ ] 所有触点、线圈、FBDCompartment 都有 varName
 - [ ] startLine 有 Xlayer: 0 和 Ylayer: 0
 - [ ] startLine / endLine / editRect 没有 varName
+- [ ] variableList 包含所有出现过的变量，FB实例 type 填 FB 类型名
 
 ---
 
 ## 输出要求
 
 1. **只输出 JSON**，不加任何解释文字（除非用户明确要求解释）
-2. 顶层是数组，数组元素直接是 segment 对象，**没有任何外层包裹对象**
+2. 顶层结构为 `[{ segmentList:[...], variableList:[...], pouType:"PROGRAM", pouName:"MAIN", extensionPath:"" }]`
 3. JSON 必须合法，可直接解析
-4. 变量命名遵循用户描述，用户未指定时使用 a/b/c... 或语义化名称
+4. 变量命名遵循用户描述，用户未指定时使用语义化名称
 5. 时间戳使用当前时间的毫秒值（13位），随机数使用8位数字
 6. 如用户描述模糊，优先生成最简结构，不臆测未提及的逻辑
 

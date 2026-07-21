@@ -46,7 +46,7 @@
 ```json
 {"name": "CU", "value": "x", "type": "BOOL", "scope": "VAR_INPUT", "comment": "计数输入"}
 ```
-> 出现了第5个字段 comment → 严禁，port 条目只能有4个字段
+> 出现了第5个字段 → 严禁，port 条目只能有4个字段
 
 ### ✅ 正确写法
 ```json

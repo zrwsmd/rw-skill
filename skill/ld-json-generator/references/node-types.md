@@ -33,7 +33,7 @@
 |------|------|
 | `contact` / `negatedContact` / `risingContact` / `fallingContact` | 所有触点类型 |
 | `coil` / `setCoil` / `resetCoil` | 所有线圈类型 |
-| `FBDCompartment` | 功能块（varName 指功能块实例名） |
+| `FBDCompartment` | 功能块（varName 放在 childrenNode 内部） |
 
 **不需要 `varName`**：`startLine` / `endLine` / `editRect`
 
@@ -41,10 +41,10 @@
 
 ```json
 "varName": {
-  "name": "",        // 固定为空字符串
-  "value": "变量名",  // 实际变量名
-  "type": "BOOL",    // 变量类型（BOOL/INT/TIME/CTU/CTD等）
-  "scope": "VAR"     // 固定填 VAR
+  "name": "",
+  "value": "变量名",
+  "type": "BOOL",
+  "scope": "VAR"
 }
 ```
 
