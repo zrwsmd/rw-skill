@@ -4,105 +4,87 @@
 
 ```json
 [{
-  "segmentList": [
-    { ...segment1... },
-    { ...segment2... }
-  ],
-  "variableList": [
-    { ...variable1... },
-    { ...variable2... }
-  ],
+  "segmentList": [ ...segment列表... ],
+  "variableList": [ ...变量列表... ],
   "pouType": "PROGRAM",
   "pouName": "MAIN",
   "extensionPath": ""
 }]
 ```
 
-## segment 对象结构
+## segment 结构
 
-### ❌ 错误写法（严禁）
+### ❌ 错误（严禁）
 ```json
 {
   "id": "segment-xxx",
-  "nodeDataArray": [ ... ]
+  "label": "",
+  "nodeDataArray": [...]
 }
 ```
-> 节点容器字段名必须是 `nodesObj`，不能是 `nodeDataArray`、`nodes`、`nodeList` 或任何其他名称
+> label 不能为空；节点容器必须是 nodesObj 对象，不是数组
 
-### ✅ 正确写法
+### ✅ 正确
 ```json
 {
   "id": "segment-{随机数}-{时间戳}",
-  "label": "",
+  "label": "系统启动自保持",
   "note": "",
-  "height": 436,
-  "width": 1430,
+  "height": 300,
+  "width": 1000,
   "isExpand": true,
   "nodesObj": {
     "start-node-line": { ... },
     "edit-node-rect": { ... },
     "contact-xxx": { ... },
-    "coil-xxx": { ... }
+    "setCoil-xxx": { ... }
   },
   "edgesObj": {}
 }
 ```
 
-> ⚠️ 关键约束：
-> - 节点容器字段名固定为 `nodesObj`，是一个**对象**（key为节点id，value为节点数据），不是数组
-> - `edgesObj` 固定为空对象 `{}`，每个 segment 都必须有
+**label**：必须填写中文功能描述
+**note**：默认空；有关键安全互锁、时序假设、复位前提时填写中文简述
+**edgesObj**：固定为空对象 `{}`，每个 segment 必须有
 
-### height / width 参考值
+## height / width 估算
 
-| 梯级复杂度 | height | width |
+| 并联支路数 | height | width |
 |-----------|--------|-------|
-| 空梯级 | 82 | 315 |
-| 简单串联（2-3触点+1线圈） | 160 | 600 |
-| 中等（含并联或1个FB） | 300 | 1000 |
-| 复杂（多并联+多FB+多线圈） | 436~538 | 1430~2105 |
+| 0（纯串联，1-3节点） | 82 | 400~600 |
+| 0（纯串联，4-6节点） | 82 | 700~1000 |
+| 2路并联 | 218 | 600~900 |
+| 3路并联 | 300 | 800~1100 |
+| 4路以上并联 | 436~538 | 1200~2000 |
+| 含功能块（在以上基础上） | +100~150 | +200~400 |
 
 ## variableList 条目结构
 
 ```json
 {
   "scope": "VAR",
-  "name": "变量名",
+  "name": "System_Run",
   "type": "BOOL",
   "initValue": "",
   "address": "",
-  "comment": "",
+  "comment": "系统运行状态",
   "pathLabels": ["base", "BOOL"],
-  "id": "变量名大写",
+  "id": "SYSTEM_RUN",
   "isShow": true
 }
 ```
 
-### pathLabels 对照
-
-| 变量类型 | pathLabels |
-|---------|------------|
-| BOOL | `["base", "BOOL"]` |
-| INT  | `["base", "INT"]` |
-| TIME | `["base", "TIME"]` |
-| CTU  | `["Standard function blocks", "CTU"]` |
-| CTD  | `["Standard function blocks", "CTD"]` |
-| TON  | `["Standard function blocks", "TON"]` |
-| TOF  | `["Standard function blocks", "TOF"]` |
-| TP   | `["Standard function blocks", "TP"]` |
-| SR   | `["Standard function blocks", "SR"]` |
-| RS   | `["Standard function blocks", "RS"]` |
-
-## 完整示例（A串B输出C）
+## 完整示例（启动自保持梯级）
 
 ```json
 [{
   "segmentList": [
     {
-      "id": "segment-12345678-1782436000000",
-      "label": "",
-      "note": "",
-      "height": 160,
-      "width": 600,
+      "id": "segment-12345678-1784700000001",
+      "label": "系统启动自保持",
+      "note": "急停为硬件常闭回路，E_Stop 断线即为TRUE触发停止",
+      "height": 300,
+      "width": 1000,
       "isExpand": true,
       "nodesObj": {
         "start-node-line": {
@@ -111,27 +93,75 @@
           "Xlayer": 0,
           "Ylayer": 0,
           "sourceIds": [],
-          "targetIds": ["contact-11111111-1782436000001"]
+          "targetIds": [
+            "negatedContact-11111111-1784700000002",
+            "negatedContact-22222222-1784700000006"
+          ]
         },
-        "contact-11111111-1782436000001": {
-          "id": "contact-11111111-1782436000001",
-          "type": "contact",
+        "negatedContact-11111111-1784700000002": {
+          "id": "negatedContact-11111111-1784700000002",
+          "type": "negatedContact",
           "sourceIds": ["start-node-line"],
-          "targetIds": ["contact-22222222-1782436000002"],
-          "varName": {"name": "", "value": "A", "type": "BOOL", "scope": "VAR"}
+          "targetIds": ["negatedContact-33333333-1784700000003"],
+          "varName": {"name": "", "value": "Stop_Button", "type": "BOOL", "scope": "VAR"}
         },
-        "contact-22222222-1782436000002": {
-          "id": "contact-22222222-1782436000002",
+        "negatedContact-33333333-1784700000003": {
+          "id": "negatedContact-33333333-1784700000003",
+          "type": "negatedContact",
+          "sourceIds": ["negatedContact-11111111-1784700000002"],
+          "targetIds": ["negatedContact-44444444-1784700000004"],
+          "varName": {"name": "", "value": "E_Stop", "type": "BOOL", "scope": "VAR"}
+        },
+        "negatedContact-44444444-1784700000004": {
+          "id": "negatedContact-44444444-1784700000004",
+          "type": "negatedContact",
+          "sourceIds": ["negatedContact-33333333-1784700000003"],
+          "targetIds": ["contact-55555555-1784700000005"],
+          "varName": {"name": "", "value": "Fault", "type": "BOOL", "scope": "VAR"}
+        },
+        "contact-55555555-1784700000005": {
+          "id": "contact-55555555-1784700000005",
           "type": "contact",
-          "sourceIds": ["contact-11111111-1782436000001"],
+          "sourceIds": ["negatedContact-44444444-1784700000004"],
           "targetIds": ["edit-node-rect"],
-          "varName": {"name": "", "value": "B", "type": "BOOL", "scope": "VAR"}
+          "varName": {"name": "", "value": "Start_Button", "type": "BOOL", "scope": "VAR"}
+        },
+        "negatedContact-22222222-1784700000006": {
+          "id": "negatedContact-22222222-1784700000006",
+          "type": "negatedContact",
+          "sourceIds": ["start-node-line"],
+          "targetIds": ["negatedContact-66666666-1784700000007"],
+          "varName": {"name": "", "value": "Stop_Button", "type": "BOOL", "scope": "VAR"}
+        },
+        "negatedContact-66666666-1784700000007": {
+          "id": "negatedContact-66666666-1784700000007",
+          "type": "negatedContact",
+          "sourceIds": ["negatedContact-22222222-1784700000006"],
+          "targetIds": ["negatedContact-77777777-1784700000008"],
+          "varName": {"name": "", "value": "E_Stop", "type": "BOOL", "scope": "VAR"}
+        },
+        "negatedContact-77777777-1784700000008": {
+          "id": "negatedContact-77777777-1784700000008",
+          "type": "negatedContact",
+          "sourceIds": ["negatedContact-66666666-1784700000007"],
+          "targetIds": ["contact-88888888-1784700000009"],
+          "varName": {"name": "", "value": "Fault", "type": "BOOL", "scope": "VAR"}
+        },
+        "contact-88888888-1784700000009": {
+          "id": "contact-88888888-1784700000009",
+          "type": "contact",
+          "sourceIds": ["negatedContact-77777777-1784700000008"],
+          "targetIds": ["edit-node-rect"],
+          "varName": {"name": "", "value": "System_Run", "type": "BOOL", "scope": "VAR"}
         },
         "edit-node-rect": {
           "id": "edit-node-rect",
           "type": "editRect",
-          "sourceIds": ["contact-22222222-1782436000002"],
-          "targetIds": ["coil-33333333-1782436000003"],
+          "sourceIds": [
+            "contact-55555555-1784700000005",
+            "contact-88888888-1784700000009"
+          ],
+          "targetIds": ["setCoil-99999999-1784700000010"],
           "children": [
             {
               "id": "edit-node-rect-left-port",
@@ -153,21 +183,23 @@
             }
           ]
         },
-        "coil-33333333-1782436000003": {
-          "id": "coil-33333333-1782436000003",
-          "type": "coil",
+        "setCoil-99999999-1784700000010": {
+          "id": "setCoil-99999999-1784700000010",
+          "type": "setCoil",
           "sourceIds": ["edit-node-rect"],
           "targetIds": [],
-          "varName": {"name": "", "value": "C", "type": "BOOL", "scope": "VAR"}
+          "varName": {"name": "", "value": "System_Run", "type": "BOOL", "scope": "VAR"}
         }
       },
       "edgesObj": {}
     }
   ],
   "variableList": [
-    {"scope":"VAR","name":"A","type":"BOOL","initValue":"","address":"","comment":"","pathLabels":["base","BOOL"],"id":"A","isShow":true},
-    {"scope":"VAR","name":"B","type":"BOOL","initValue":"","address":"","comment":"","pathLabels":["base","BOOL"],"id":"B","isShow":true},
-    {"scope":"VAR","name":"C","type":"BOOL","initValue":"","address":"","comment":"","pathLabels":["base","BOOL"],"id":"C","isShow":true}
+    {"scope":"VAR","name":"Start_Button","type":"BOOL","initValue":"","address":"","comment":"启动按钮","pathLabels":["base","BOOL"],"id":"START_BUTTON","isShow":true},
+    {"scope":"VAR","name":"Stop_Button","type":"BOOL","initValue":"","address":"","comment":"停止按钮","pathLabels":["base","BOOL"],"id":"STOP_BUTTON","isShow":true},
+    {"scope":"VAR","name":"E_Stop","type":"BOOL","initValue":"","address":"","comment":"急停","pathLabels":["base","BOOL"],"id":"E_STOP","isShow":true},
+    {"scope":"VAR","name":"Fault","type":"BOOL","initValue":"","address":"","comment":"故障状态","pathLabels":["base","BOOL"],"id":"FAULT","isShow":true},
+    {"scope":"VAR","name":"System_Run","type":"BOOL","initValue":"","address":"","comment":"系统运行状态","pathLabels":["base","BOOL"],"id":"SYSTEM_RUN","isShow":true}
   ],
   "pouType": "PROGRAM",
   "pouName": "MAIN",
