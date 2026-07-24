@@ -318,6 +318,7 @@ edit-node-rect.sourceIds = [C.id]
 
 - [ ] 顶层是 `[{ segmentList, variableList, pouType, pouName, extensionPath }]` 结构
 - [ ] `extensionPath` 固定为空字符串 `""`
+- [ ] 每个 segment 必须同时包含 `id` 与 `isExpand`：`id` 格式固定为 `segment-{8位随机数}-{13位时间戳}`，且所有 segment 的 id 全局唯一；`isExpand` 必须存在且固定为布尔值 `true`（不得省略、不得写成字符串 `"true"`）
 - [ ] 每个 segment 的 `label` 已填写中文功能描述，不为空
 - [ ] `note` 字段：无特殊工艺说明时为空，有关键互锁/时序假设时填写
 - [ ] 节点容器字段名是 `nodesObj`（对象），不是 `nodeDataArray` 或其他
