@@ -166,6 +166,17 @@ D.sourceIds = [B.id, C.id]
 - FBDCompartment → 后续节点：FBDCompartment.targetIds 包含下一节点.id
 - 功能块引脚变量不走拓扑连线，只写在 portInputs/portOutputs 里
 
+### Step 3.5：强制拓扑完整性规则
+
+**强制规则：禁止悬空节点。** 在同一个 segment 内，除左母线 `start-node-line` 外，所有节点（触点、线圈、FBDCompartment、editRect、endLine）都必须从 `start-node-line` 出发，经由 `targetIds` 路径可达。
+
+- `start-node-line.sourceIds` 必须固定为 `[]`，且 `targetIds` 至少包含一个首节点 ID。
+- 除 `start-node-line` 外，每个节点的 `sourceIds` 必须非空。
+- 除末端线圈及 `endLine` 外，每个节点的 `targetIds` 必须非空。
+- 所有连接必须双向一致：若 `A.targetIds` 包含 `B.id`，则 `B.sourceIds` 必须包含 `A.id`；反之亦然。
+- 每个 segment 必须从 `start-node-line` 沿 `targetIds` 完成一次 BFS/DFS 遍历；`nodesObj` 中的全部节点 ID 都必须被遍历到。若存在未访问节点，即为悬空节点，必须修正后才能输出。
+- 批量生成时，禁止仅按“已创建节点”判断正确；必须对生成完成的最终 `nodesObj` 执行一次独立遍历校验。
+
 ### Step 4：构造 editRect
 
 每个 segment 必须有且仅有一个 `edit-node-rect`，位于最后一个触点/功能块与末端输出节点之间；末端输出节点可以是线圈或 endLine。
@@ -324,6 +335,10 @@ edit-node-rect.sourceIds = [C.id]
 - [ ] 节点容器字段名是 `nodesObj`（对象），不是 `nodeDataArray` 或其他
 - [ ] 每个 segment 有 `edgesObj: {}`
 - [ ] `editRect.sourceIds`：串联时为最后节点；并联直连输出时包含全部支路末节点；并联后有公共节点时仅为公共节点
+- [ ] **连通性检查**：对每个 segment 从 `start-node-line` 沿 `targetIds` 执行 BFS/DFS；`nodesObj` 中所有节点均被访问到，不存在悬空节点
+- [ ] `start-node-line.sourceIds` 固定为 `[]`，且其 `targetIds` 非空；除此以外所有节点的 `sourceIds` 均非空
+- [ ] 除线圈和 `endLine` 外，所有节点的 `targetIds` 均非空
+- [ ] 双向连接一致：每一条 `A.targetIds -> B.id` 均能在 `B.sourceIds` 中找到 `A.id`，反向关系也完全一致
 - [ ] 若 segment 以功能块输出结束，拓扑必须为 `FBDCompartment -> edit-node-rect -> endLine`
 - [ ] 功能块 portOutputs 中的 Q、ET、CV、Q1 等变量没有被 coil、setCoil 或 resetCoil 重复写入
 - [ ] 每个 FBDCompartment 外层**没有** varName，varName **在** childrenNode 内
