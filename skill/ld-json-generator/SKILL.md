@@ -349,6 +349,8 @@ edit-node-rect.sourceIds = [C.id]
 - [ ] startLine / endLine / editRect 没有 varName
 - [ ] 同一变量在同一梯级多次出现时，每次使用不同节点 id
 - [ ] variableList 中同名变量只出现一次
+- [ ] **变量引用与声明一致性检查**：收集所有 segment 内触点、线圈、FBDCompartment 的 `varName.value`，以及所有功能块 `portInputs` / `portOutputs`（排除 EN、ENO）的 `value`，得到引用变量集合 `UsedVars`；收集 `variableList[*].name` 得到声明变量集合 `DeclaredVars`。必须满足 `UsedVars == DeclaredVars`：`UsedVars - DeclaredVars` 与 `DeclaredVars - UsedVars` 均必须为空。
+- [ ] 所有变量引用必须与 `variableList[*].name` **逐字符完全一致**，包括大小写、下划线、单词顺序及全部词段；不允许模糊匹配、自动补全或名称近似视为同一变量。
 - [ ] 所有变量命名统一为 Pascal_Snake_Case，无混用
 - [ ] 若逻辑包含双线圈气缸，伸出/缩回电磁阀梯级必须互相串联对方常闭触点
 - [ ] 故障报警：setCoil(Fault) 锁存，单独梯级 Fault 常开驱动 coil(Alarm)
