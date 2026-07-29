@@ -415,7 +415,7 @@ edit-node-rect.sourceIds = [C.id]
 
 `references/runtime-library.md` 是元件定义的唯一真源，优先级高于本 Skill 内的示例、常用元件清单、端口样例和 `function-blocks.md` 的示例。若任何旧示例与运行时库冲突，必须以运行时库为准。
 
-- 不再以 `data.json` 作为生成时直接查询文件。
+- 运行时库定义只查询 `references/runtime-library.md`；不得自行推断或改写库名称、端口及数据类型。
 - 本 Skill 中的 CTU、TON、ABS、GT、PID、类型转换等文字或 JSON 均仅为渲染格式示例，不构成完整端口定义。
 - 使用未在示例列出的库函数、功能块或数据类型时同样允许，但必须先查运行时库并遵守其原始定义。
 
