@@ -3,8 +3,7 @@ name: ld-json-generator
 description: >
   生成 IEC 61131-3 梯形图（Ladder Diagram）专用 JSON 格式。当用户用自然语言描述梯形图逻辑时，
   直接输出可供前端渲染器使用的完整 JSON 结构，包含 segmentList、variableList 等所有字段。
-  触发场景：用户描述"梯形图"、"LD程序"、"PLC逻辑"、"触点线圈"、"功能块"、"函数"、"CTU/CTD/TON/TOF/TP/SR/RS"、
-  "ABS/SUB/ADD/MUL/DIV/GT/GE/EQ/LT/LE/NE"、"模拟量比较"、"阈值判断"、"位置偏差"
+  触发场景：用户描述"梯形图"、"LD程序"、"PLC逻辑"、"触点线圈"、"功能块"、"CTU/CTD/TON/TOF/TP/SR/RS"
   等关键词，或要求"生成JSON"、"转成JSON"、"写成梯形图格式"时，必须使用本 Skill。
   即使用户只是说"帮我写一段XX逻辑的梯形图"，也应使用本 Skill 输出 JSON。
   严格禁止：FBDCompartment 外层出现 varName；port 条目字段数超过4个；
@@ -34,7 +33,8 @@ description: >
 
 > 详细字段规范见 `references/schema.md`
 > 节点类型对照见 `references/node-types.md`
-> 功能块引脚见 `references/function-blocks.md`
+> FBD JSON 渲染规则见 `references/function-blocks.md`
+> 运行时库索引（元件名称、类别、端口与数据类型）见 `references/runtime-library.md`
 > 业务模式见 `references/patterns.md`
 
 ---
@@ -105,6 +105,16 @@ description: >
 }
 ```
 
+### Step 2.6.5：运行时库查询（强制）
+
+每次创建或声明运行时库元件前，必须先查询 `references/runtime-library.md`，它是库定义的唯一真源。
+
+- 对 `function` 与 `functionBlock`：`childrenNode.type`、库 type、业务端口名称、顺序、数量、类型和边沿属性必须逐项匹配库条目。
+- `function` 必须使用 `FUN-compartment-{name}-*` 与 `isFunction: true`，且不得有 `varName`。
+- `functionBlock` 必须使用 `FBD-compartment-{name}-*` 与 `isFunction: false`，且必须在 `childrenNode.varName` 声明实例。
+- 对 `struct`：按条目成员名、成员类型及默认值声明；对 `enum`：仅使用条目枚举成员；对 `derived`：按基础类型与默认值声明。三者均不是 FBD 节点。
+- 不得按名称习惯改写库名（如自行添加或删除下划线），也不得按示例推断未查询的端口。
+
 ### Step 2.6：FBDCompartment 的 varName 位置（关键约束）
 
 FBDCompartment 的 `varName` 必须放在 `childrenNode` 内部，FBDCompartment 外层绝对不能有 `varName`。
@@ -144,71 +154,6 @@ FBDCompartment 的 `varName` 必须放在 `childrenNode` 内部，FBDCompartment
   }
 }
 ```
-
-### Step 2.7：函数与功能块区分（关键约束）
-
-运行时库的 `type` 用于区分函数和功能块；但在梯形图 JSON 中，二者的外层节点 `type` **一律**为 `FBDCompartment`。
-
-| 运行时库类别    | JSON 外层 `type` | `childrenNode.isFunction` | 示例                                            |
-| --------------- | ---------------- | ------------------------: | ----------------------------------------------- |
-| `functionBlock` | `FBDCompartment` |                   `false` | TON、TOF、TP、CTU、CTD、SR、RS                  |
-| `function`      | `FBDCompartment` |                    `true` | ABS、SUB、ADD、MUL、DIV、GT、GE、EQ、LT、LE、NE |
-
-### 函数节点 ID 与显示规则（渲染器强制约束）
-
-函数仍使用外层 `"type": "FBDCompartment"`，但其节点 `id` 必须使用 `FUN-compartment-{FUNCTION}-{随机串}-{13位时间戳}` 格式，例如 `FUN-compartment-GT-VStfPf-1785289136383`；**不得**使用 `FBD-compartment-` 前缀。
-
-- 函数的 `childrenNode` 只能包含 `type`、`isFunction: true`、`portInputs`、`portOutputs`；不得有 `varName`。
-- 函数没有实例名，渲染标题只能显示函数类型（例如 `GT`、`SEL`、`ABS`、`SUB`），不能显示任何变量或实例名。
-- 功能块仍使用 `FBD-compartment-{TYPE}-{随机串}-{13位时间戳}`；只有功能块可在 `childrenNode.varName` 中声明实例名。
-- 函数之间可直接用 `sourceIds` / `targetIds` 串联，例如 `FUN-compartment-SEL -> FUN-compartment-GT -> edit-node-rect -> endLine`。
-- `SEL` 是函数：端口为 `G: BOOL`、`IN0: ANY`、`IN1: ANY`，输出为 `OUT: ANY`；`GT` 是函数：端口为 `IN1: ANY`、`IN2: ANY`，输出为 `OUT: BOOL`。
-
-函数型节点示例（GT）：
-
-```json
-{
-  "id": "FUN-compartment-GT-xxxxxxxx-xxxxxxxxxxxxx",
-  "type": "FBDCompartment",
-  "sourceIds": ["前置节点id"],
-  "targetIds": ["后续节点id"],
-  "childrenNode": {
-    "type": "GT",
-    "isFunction": true,
-    "portInputs": [
-      { "name": "EN", "value": "", "scope": "", "type": "" },
-      {
-        "name": "IN1",
-        "value": "Real_Sync_Deviation",
-        "scope": "VAR_INPUT",
-        "type": "REAL"
-      },
-      {
-        "name": "IN2",
-        "value": "Real_Sync_Deviation_Limit",
-        "scope": "VAR_INPUT",
-        "type": "REAL"
-      }
-    ],
-    "portOutputs": [
-      { "name": "ENO", "value": "", "scope": "", "type": "" },
-      {
-        "name": "OUT",
-        "value": "Sync_Deviation_Exceeded",
-        "scope": "VAR_OUTPUT",
-        "type": "BOOL"
-      }
-    ]
-  }
-}
-```
-
-- 功能块外层不得有 `varName`，其 `varName` 必须在 `childrenNode` 内；**函数不得出现 `varName`，包括 childrenNode 内也不得出现。**
-- 每个 FBDCompartment 的 `portInputs` 第一项是 EN，`portOutputs` 第一项是 ENO。
-- EN / ENO 以外的业务端口名称、数量、顺序和类型，必须严格匹配 `data.json` 中对应条目。
-- 常用函数端口：`ABS` 为 `IN -> OUT`；`SUB` 为 `IN1, IN2 -> OUT`；`GT/GE/EQ/LT/LE/NE` 为 `IN1, IN2 -> OUT`。
-- 比较函数的 `OUT` 类型固定为 `BOOL`，不得写成 `Q`。
-- 函数不可实例化：`ABS`、`SUB`、`ADD`、`MUL`、`DIV`、`GT`、`GE`、`EQ`、`LT`、`LE`、`NE` 均不得声明实例变量，也不得在 `variableList` 中创建函数实例。
 
 ### Step 3：建立拓扑关系（sourceIds / targetIds）
 
@@ -313,12 +258,12 @@ edit-node-rect.sourceIds = [C.id]
 }
 ```
 
-### Step 4.5：FBD 输出与 endLine
+### Step 4.5：功能块输出与 endLine
 
-功能块 `portOutputs` 中的 Q、ET、CV、Q1 等变量，以及函数 `portOutputs` 中的 OUT 变量，均由对应 FBDCompartment 直接写入。
+功能块 `portOutputs` 中的 Q、ET、CV、Q1 等变量由功能块直接写入。
 
 - 严禁在同一或其他梯级中，用 `coil`、`setCoil` 或 `resetCoil`
-  写入同一个 FBDCompartment 输出变量，包括 Q、ET、CV、Q1、OUT。
+  写入同一个功能块输出变量。
 - 若一个 segment 以 FBDCompartment 的输出结束，且不需要额外输出线圈，
   拓扑必须为：`FBDCompartment -> edit-node-rect -> endLine`。
 - FBDCompartment.targetIds 必须为 `["edit-node-rect"]`。
@@ -328,7 +273,7 @@ edit-node-rect.sourceIds = [C.id]
 - endLine 不带 `varName`，id 格式为
   `"end-node-line-{8位随机数}-{13位时间戳}"`。
 - 后续梯级通过触点读取功能块输出变量，例如
-  `Action_Timeout(NO)`、`Class_A_Count_Done(NO)`、`Sync_Deviation_Exceeded(NO)`。
+  `Action_Timeout(NO)`、`Class_A_Count_Done(NO)`。
 
 ### Step 5：构造 variableList
 
@@ -354,8 +299,6 @@ edit-node-rect.sourceIds = [C.id]
 | -------- | ------------------------------------- |
 | BOOL     | `["base", "BOOL"]`                    |
 | INT      | `["base", "INT"]`                     |
-| REAL     | `["base", "REAL"]`                    |
-| LREAL    | `["base", "LREAL"]`                   |
 | TIME     | `["base", "TIME"]`                    |
 | CTU      | `["Standard function blocks", "CTU"]` |
 | CTD      | `["Standard function blocks", "CTD"]` |
@@ -376,25 +319,21 @@ edit-node-rect.sourceIds = [C.id]
 
 **各类型变量命名前缀规则：**
 
-| 变量类别           | 前缀                                          | 示例                                                    |
-| ------------------ | --------------------------------------------- | ------------------------------------------------------- |
-| BOOL 输入信号      | 无前缀，语义词开头                            | `Start_Button`、`E_Stop`、`Inlet_Sensor`                |
-| BOOL 内部状态/输出 | 无前缀，语义词开头                            | `System_Run`、`Cylinder_A_Extending`                    |
-| BOOL 物理阀/输出点 | 无前缀，`_Valve`/`_Motor`/`_Output`结尾       | `Cylinder_A_Extend_Valve`、`Conveyor_Motor`             |
-| TON 实例           | `Ton_`                                        | `Ton_Cyl_A_Timeout`、`Ton_Jam_Detect`                   |
-| TOF 实例           | `Tof_`                                        | `Tof_Conveyor_Delay`                                    |
-| TP 实例            | `Tp_`                                         | `Tp_Alarm_Pulse`                                        |
-| CTU 实例           | `Ctu_`                                        | `Ctu_Class_A`、`Ctu_Reject`                             |
-| CTD 实例           | `Ctd_`                                        | `Ctd_Batch`                                             |
-| SR 实例            | `Sr_`                                         | `Sr_Cyl_A`                                              |
-| RS 实例            | `Rs_`                                         | `Rs_Alarm`                                              |
-| TIME 设定值        | `Time_` + `_Set` 结尾                         | `Time_Cyl_Timeout_Set`、`Time_Jam_Set`                  |
-| TIME 当前值/输出   | `Time_` + `_Elapsed` 结尾                     | `Time_Cyl_A_Elapsed`、`Time_Jam_Elapsed`                |
-| INT 计数/数值      | `Int_`                                        | `Int_Class_A_Count`、`Int_Batch_Set`                    |
-| REAL 模拟量        | `Real_`                                       | `Real_Cylinder_A_Position`、`Real_Sync_Deviation_Limit` |
-| LREAL 模拟量       | `Lreal_`                                      | `Lreal_Axis_Position`                                   |
-| 算术函数实例       | `Abs_` / `Sub_` / `Add_` / `Mul_` / `Div_`    | `Sub_Sync_Difference`、`Abs_Sync_Deviation`             |
-| 比较函数实例       | `Gt_` / `Ge_` / `Eq_` / `Lt_` / `Le_` / `Ne_` | `Gt_Sync_Deviation`、`Le_Pressure_Limit`                |
+| 变量类别           | 前缀                                    | 示例                                        |
+| ------------------ | --------------------------------------- | ------------------------------------------- |
+| BOOL 输入信号      | 无前缀，语义词开头                      | `Start_Button`、`E_Stop`、`Inlet_Sensor`    |
+| BOOL 内部状态/输出 | 无前缀，语义词开头                      | `System_Run`、`Cylinder_A_Extending`        |
+| BOOL 物理阀/输出点 | 无前缀，`_Valve`/`_Motor`/`_Output`结尾 | `Cylinder_A_Extend_Valve`、`Conveyor_Motor` |
+| TON 实例           | `Ton_`                                  | `Ton_Cyl_A_Timeout`、`Ton_Jam_Detect`       |
+| TOF 实例           | `Tof_`                                  | `Tof_Conveyor_Delay`                        |
+| TP 实例            | `Tp_`                                   | `Tp_Alarm_Pulse`                            |
+| CTU 实例           | `Ctu_`                                  | `Ctu_Class_A`、`Ctu_Reject`                 |
+| CTD 实例           | `Ctd_`                                  | `Ctd_Batch`                                 |
+| SR 实例            | `Sr_`                                   | `Sr_Cyl_A`                                  |
+| RS 实例            | `Rs_`                                   | `Rs_Alarm`                                  |
+| TIME 设定值        | `Time_` + `_Set` 结尾                   | `Time_Cyl_Timeout_Set`、`Time_Jam_Set`      |
+| TIME 当前值/输出   | `Time_` + `_Elapsed` 结尾               | `Time_Cyl_A_Elapsed`、`Time_Jam_Elapsed`    |
+| INT 计数/数值      | `Int_`                                  | `Int_Class_A_Count`、`Int_Batch_Set`        |
 
 ### Step 7：segment 尺寸估算
 
@@ -424,11 +363,7 @@ edit-node-rect.sourceIds = [C.id]
 - [ ] 除线圈和 `endLine` 外，所有节点的 `targetIds` 均非空
 - [ ] 双向连接一致：每一条 `A.targetIds -> B.id` 均能在 `B.sourceIds` 中找到 `A.id`，反向关系也完全一致
 - [ ] 若 segment 以功能块输出结束，拓扑必须为 `FBDCompartment -> edit-node-rect -> endLine`
-- [ ] FBDCompartment 的 portOutputs 中 Q、ET、CV、Q1、OUT 等变量没有被 coil、setCoil 或 resetCoil 重复写入
-- [ ] 每个 FBDCompartment 外层 `type` 都是 `FBDCompartment`；功能块 `isFunction: false`，函数 `isFunction: true`
-- [ ] 功能块必须在 childrenNode 内具有 varName；函数不得在外层或 childrenNode 内具有 varName，且 variableList 不得声明任何函数实例变量
-- [ ] 函数端口严格匹配 data.json：ABS 使用 IN/OUT，SUB 使用 IN1/IN2/OUT，比较函数使用 IN1/IN2/OUT
-- [ ] ABS、SUB 的输入与 OUT 实际类型一致；GT/GE/EQ/LT/LE/NE 的 IN1/IN2 类型兼容且 OUT 必须为 BOOL
+- [ ] 功能块 portOutputs 中的 Q、ET、CV、Q1 等变量没有被 coil、setCoil 或 resetCoil 重复写入
 - [ ] 每个 FBDCompartment 外层**没有** varName，varName **在** childrenNode 内
 - [ ] 每个 port 条目**严格只有** name / value / scope / type 四个字段
 - [ ] portInputs 第一项是 EN（scope: ""），portOutputs 第一项是 ENO（scope: ""）
@@ -458,22 +393,34 @@ edit-node-rect.sourceIds = [C.id]
 
 ## 常见模式快速参考
 
-| 用户说                | 对应结构                                                                         |
-| --------------------- | -------------------------------------------------------------------------------- |
-| "A 串联 B"            | A.targetIds=[B.id], B.sourceIds=[A.id]                                           |
-| "从左母线并联A、B、C" | startLine.targetIds=[A,B,C]，三者targetIds均指向汇合节点                         |
-| "A 并联 B 后串 C"     | 源节点.targetIds=[A,B], A/B.targetIds=[C.id]                                     |
-| "常闭触点"            | type: "negatedContact"                                                           |
-| "上升沿"              | type: "risingContact"                                                            |
-| "下降沿"              | type: "fallingContact"                                                           |
-| "置位线圈"            | type: "setCoil"                                                                  |
-| "复位线圈"            | type: "resetCoil"                                                                |
-| "启动自保持"          | 见 references/patterns.md → 模式1                                                |
-| "气缸前进/缩回"       | 见 references/patterns.md → 模式2                                                |
-| "故障报警"            | 见 references/patterns.md → 模式3                                                |
-| "计数器CTU"           | type: "FBDCompartment", childrenNode.type: "CTU"                                 |
-| "定时器TON"           | type: "FBDCompartment", childrenNode.type: "TON"                                 |
-| "绝对值/ABS"          | type: "FBDCompartment", childrenNode.type: "ABS", isFunction: true               |
-| "减法/SUB"            | type: "FBDCompartment", childrenNode.type: "SUB", isFunction: true               |
-| "大于/小于/等于比较"  | type: "FBDCompartment", childrenNode.type: "GT/GE/EQ/LT/LE/NE", isFunction: true |
-| "同步偏差超限"        | 依次使用 SUB -> ABS -> GT，三个节点外层均为 FBDCompartment                       |
+| 用户说                | 对应结构                                                 |
+| --------------------- | -------------------------------------------------------- |
+| "A 串联 B"            | A.targetIds=[B.id], B.sourceIds=[A.id]                   |
+| "从左母线并联A、B、C" | startLine.targetIds=[A,B,C]，三者targetIds均指向汇合节点 |
+| "A 并联 B 后串 C"     | 源节点.targetIds=[A,B], A/B.targetIds=[C.id]             |
+| "常闭触点"            | type: "negatedContact"                                   |
+| "上升沿"              | type: "risingContact"                                    |
+| "下降沿"              | type: "fallingContact"                                   |
+| "置位线圈"            | type: "setCoil"                                          |
+| "复位线圈"            | type: "resetCoil"                                        |
+| "启动自保持"          | 见 references/patterns.md → 模式1                        |
+| "气缸前进/缩回"       | 见 references/patterns.md → 模式2                        |
+| "故障报警"            | 见 references/patterns.md → 模式3                        |
+| "计数器CTU"           | type: "FBDCompartment", childrenNode.type: "CTU"         |
+| "定时器TON"           | type: "FBDCompartment", childrenNode.type: "TON"         |
+
+---
+
+## 运行时库优先级（覆盖同名旧规则）
+
+`references/runtime-library.md` 是元件定义的唯一真源，优先级高于本 Skill 内的示例、常用元件清单、端口样例和 `function-blocks.md` 的示例。若任何旧示例与运行时库冲突，必须以运行时库为准。
+
+- 不再以 `data.json` 作为生成时直接查询文件。
+- 本 Skill 中的 CTU、TON、ABS、GT、PID、类型转换等文字或 JSON 均仅为渲染格式示例，不构成完整端口定义。
+- 使用未在示例列出的库函数、功能块或数据类型时同样允许，但必须先查运行时库并遵守其原始定义。
+
+输出前额外核验：
+
+- [ ] 每个使用的运行时元件均在 `runtime-library.md` 中找到，且名称逐字符一致。
+- [ ] 业务端口、实例规则、库 type、ID 前缀和 `isFunction` 全部与库条目一致。
+- [ ] `struct` 成员、`enum` 值、`derived` 基础类型/默认值均从库文件获取，且未被建模为 FBD 节点。

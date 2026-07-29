@@ -1,320 +1,89 @@
-# 功能块（FBDCompartment）完整规范
+# FBDCompartment 渲染规范
 
-## FBDCompartment 节点结构
+> 本文件只定义 FBD JSON 的渲染格式、实例规则和端口对象格式。运行时库元件名称、类别、业务端口、数据类型、结构体成员、枚举值和派生类型定义，**唯一以** `references/runtime-library.md` **为准**。
 
-### ❌ 错误写法（严禁）
+## 职责边界
+
+- `runtime-library.md`：查询 `function`、`functionBlock`、`struct`、`enum`、`derived` 的原始定义。
+- 本文件：将库中的 `function` 或 `functionBlock` 映射为 `FBDCompartment` JSON 节点。
+- 不得在本文件或生成逻辑中重新维护 CTU、TON、PID、SEL、转换函数等元件的端口表；示例只说明 JSON 形状，不能替代库查询。
+
+## FBD 节点
+
+所有可执行库元件在梯形图 JSON 中的外层节点都为 `"type": "FBDCompartment"`。外层不得存在 `varName`，实例名只能放入 `childrenNode.varName`。
+
 ```json
 {
-  "id": "FBD-compartment-CTU-xxx",
+  "id": "FBD-compartment-TYPE-随机串-13位时间戳",
   "type": "FBDCompartment",
-  "varName": { ... },
-  "childrenNode": { "type": "CTU", ... }
-}
-```
-> varName 在外层 → 严禁
-
-### ✅ 正确写法
-```json
-{
-  "id": "FBD-compartment-CTU-xxx",
-  "type": "FBDCompartment",
-  "sourceIds": [...],
-  "targetIds": [...],
+  "sourceIds": ["前置节点id"],
+  "targetIds": ["后续节点id"],
   "childrenNode": {
-    "type": "CTU",
+    "type": "TYPE",
     "isFunction": false,
-    "portInputs": [...],
-    "portOutputs": [...],
-    "varName": { "name": "", "value": "Ctu_Class_A", "type": "CTU", "scope": "VAR" }
+    "portInputs": [],
+    "portOutputs": [],
+    "varName": {"name": "", "value": "实例名", "type": "TYPE", "scope": "VAR"}
   }
 }
 ```
 
+## 函数与功能块
 
-## 函数节点的渲染器格式（强制）
+| 库 `type` | 节点 ID | `isFunction` | `varName` |
+|---|---|---:|---|
+| `function` | `FUN-compartment-{name}-{随机串}-{13位时间戳}` | `true` | 禁止，外层和 `childrenNode` 均不得有 |
+| `functionBlock` | `FBD-compartment-{name}-{随机串}-{13位时间戳}` | `false` | 必须在 `childrenNode` 内；同时在 `variableList` 声明该实例 |
 
-函数不能实例化。函数的外层节点仍为 `"type": "FBDCompartment"`，但节点 id 必须是 `FUN-compartment-{FUNCTION}-{随机串}-{13位时间戳}`；例如：`FUN-compartment-SEL-W42NCi-1785289130639`、`FUN-compartment-GT-VStfPf-1785289136383`。
+生成前必须在 `runtime-library.md` 找到同名条目。`childrenNode.type` 必须与库的原始 `name` 逐字符相同；不得把连写名称改成下划线形式，也不得按 IEC 习惯臆测端口。
+
+函数格式示例：
 
 ```json
 {
-  "id": "FUN-compartment-GT-VStfPf-1785289136383",
+  "id": "FUN-compartment-库函数名-随机串-13位时间戳",
   "type": "FBDCompartment",
-  "sourceIds": ["FUN-compartment-SEL-W42NCi-1785289130639"],
-  "targetIds": ["edit-node-rect"],
+  "sourceIds": ["前置节点id"],
+  "targetIds": ["后续节点id"],
   "childrenNode": {
-    "type": "GT",
+    "type": "库函数名",
     "isFunction": true,
     "portInputs": [
-      {"name":"EN","value":"","scope":"","type":""},
-      {"name":"IN1","value":"e","scope":"VAR_INPUT","type":"ANY"},
-      {"name":"IN2","value":"f","scope":"VAR_INPUT","type":"ANY"}
+      {"name":"EN","value":"","scope":"","type":""}
     ],
     "portOutputs": [
-      {"name":"ENO","value":"","scope":"","type":""},
-      {"name":"OUT","value":"g","scope":"VAR_OUTPUT","type":"BOOL"}
+      {"name":"ENO","value":"","scope":"","type":""}
     ]
   }
 }
 ```
 
-函数的 `childrenNode` 内**绝不能**有 `varName`；因此画面只显示 `GT`、`SEL`、`ABS` 等函数名，不显示任何实例名。只有有状态功能块使用 `FBD-compartment-` ID 和 `childrenNode.varName`。
+## 端口规则
 
-## 函数与功能块区分
+- `portInputs` 第一项固定是 `EN`，`portOutputs` 第一项固定是 `ENO`；两者均为 `{"name":"EN/ENO","value":"","scope":"","type":""}`。
+- 除 EN/ENO 外，端口名称、顺序、数量、库类型及边沿属性必须逐项取自 `runtime-library.md`。
+- 每个端口对象严格只能有四个字段：`name`、`value`、`scope`、`type`。
+- 非 EN 输入使用 `scope: "VAR_INPUT"`；非 ENO 输出使用 `scope: "VAR_OUTPUT"`。
+- 库中的 `ANY`、`ANY_NUM` 等为约束；JSON 中端口的 `type` 必须填实际使用的兼容变量类型，不能填泛型占位符。
 
-运行时库中的 `type` 用于区分函数和功能块；但在梯形图 JSON 中，两者的外层节点 `type` **一律**为 `FBDCompartment`。
+## 输出与实例
 
-| 运行时库类别 | JSON 外层 `type` | `childrenNode.isFunction` | 示例 |
-|---|---|---:|---|
-| `functionBlock` | `FBDCompartment` | `false` | TON、TOF、TP、CTU、CTD、SR、RS |
-| `function` | `FBDCompartment` | `true` | ABS、SUB、ADD、MUL、DIV、GT、GE、EQ、LT、LE、NE |
+- FBD 输出端口写入的变量（例如库定义的 `Q`、`ET`、`CV`、`OUT`）不得再由 `coil`、`setCoil` 或 `resetCoil` 写入。
+- 若梯级在 FBD 输出处结束，拓扑固定为 `FBDCompartment -> edit-node-rect -> endLine`。
+- 功能块实例的 `varName.value`、端口变量和所有引用变量都必须在 `variableList` 中恰好声明一次；函数没有实例变量。
 
-函数型节点完整结构示例（GT）：
+## 类型定义
 
-```json
-{
-  "id": "FUN-compartment-GT-xxxxxxxx-xxxxxxxxxxxxx",
-  "type": "FBDCompartment",
-  "sourceIds": ["前置节点id"],
-  "targetIds": ["后续节点id"],
-  "childrenNode": {
-    "type": "GT",
-    "isFunction": true,
-    "portInputs": [
-      {"name": "EN", "value": "", "scope": "", "type": ""},
-      {"name": "IN1", "value": "Real_Sync_Deviation", "scope": "VAR_INPUT", "type": "REAL"},
-      {"name": "IN2", "value": "Real_Sync_Deviation_Limit", "scope": "VAR_INPUT", "type": "REAL"}
-    ],
-    "portOutputs": [
-      {"name": "ENO", "value": "", "scope": "", "type": ""},
-      {"name": "OUT", "value": "Sync_Deviation_Exceeded", "scope": "VAR_OUTPUT", "type": "BOOL"}
-    ],
-    "varName": {"name": "", "value": "Gt_Sync_Deviation", "type": "GT", "scope": "VAR"}
-  }
-}
-```
+`struct`、`enum`、`derived` 是库数据类型，不创建 `FBDCompartment`：
 
-- 功能块外层不得出现 `varName`，其实例 `varName` 必须置于 `childrenNode` 内。
-- **函数不可实例化**：函数外层和 `childrenNode` 内均不得出现 `varName`，也不得在 `variableList` 中声明函数实例变量。
-- `childrenNode.type` 必须使用运行时库中的准确元件名。
-- EN / ENO 以外的业务端口名称、数量、顺序和类型必须严格匹配 `data.json` 的对应条目。
+- `struct`：按库中“结构体成员”声明和访问，成员名、类型、默认值不可改写。
+- `enum`：变量只能使用库列出的枚举成员。
+- `derived`：按库中的基础类型与默认值声明。
 
+## 生成前检查
 
----
-
-## portInputs / portOutputs 字段规则
-
-每个 port 条目**严格只有 4 个字段**：`name` / `value` / `scope` / `type`
-
-### ❌ 错误（第5个字段）
-```json
-{"name": "CU", "value": "x", "type": "BOOL", "scope": "VAR_INPUT", "comment": "..."}
-```
-
-### ✅ 正确
-```json
-{"name": "CU", "value": "Sort_A_Trigger", "scope": "VAR_INPUT", "type": "BOOL"}
-```
-
-### scope 规则
-| scope | 适用 |
-|-------|------|
-| `""` | EN 和 ENO |
-| `"VAR_INPUT"` | 除EN外的输入引脚 |
-| `"VAR_OUTPUT"` | 除ENO外的输出引脚 |
-
-### 首位固定项
-```json
-// portInputs 第一个
-{"name": "EN",  "value": "", "scope": "", "type": ""}
-// portOutputs 第一个
-{"name": "ENO", "value": "", "scope": "", "type": ""}
-```
-
----
-
-## 各功能块引脚定义
-
-### CTU（加计数器）
-> CU 引脚建议接上升沿中间变量，避免一次动作重复计数
-
-```json
-"portInputs": [
-  {"name": "EN",  "value": "",                    "scope": "",           "type": ""},
-  {"name": "CU",  "value": "Sort_A_Trigger",       "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "R",   "value": "Counter_Reset",         "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "PV",  "value": "Int_Class_A_Batch_Set", "scope": "VAR_INPUT",  "type": "INT"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "",                    "scope": "",           "type": ""},
-  {"name": "Q",   "value": "Class_A_Count_Done",   "scope": "VAR_OUTPUT", "type": "BOOL"},
-  {"name": "CV",  "value": "Int_Class_A_Count",     "scope": "VAR_OUTPUT", "type": "INT"}
-],
-"varName": {"name": "", "value": "Ctu_Class_A", "type": "CTU", "scope": "VAR"}
-```
-
-### CTD（减计数器）
-```json
-"portInputs": [
-  {"name": "EN",  "value": "", "scope": "", "type": ""},
-  {"name": "CD",  "value": "变量名", "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "LD",  "value": "变量名", "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "PV",  "value": "变量名", "scope": "VAR_INPUT",  "type": "INT"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "Q",   "value": "变量名", "scope": "VAR_OUTPUT", "type": "BOOL"},
-  {"name": "CV",  "value": "变量名", "scope": "VAR_OUTPUT", "type": "INT"}
-],
-"varName": {"name": "", "value": "Ctd_实例名", "type": "CTD", "scope": "VAR"}
-```
-
-### TON（延时接通定时器）
-```json
-"portInputs": [
-  {"name": "EN",  "value": "", "scope": "", "type": ""},
-  {"name": "IN",  "value": "变量名",                   "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "PT",  "value": "Time_Xxx_Set",              "scope": "VAR_INPUT",  "type": "TIME"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "Q",   "value": "变量名",                   "scope": "VAR_OUTPUT", "type": "BOOL"},
-  {"name": "ET",  "value": "Time_Xxx_Elapsed",          "scope": "VAR_OUTPUT", "type": "TIME"}
-],
-"varName": {"name": "", "value": "Ton_实例名", "type": "TON", "scope": "VAR"}
-```
-
-### TOF（延时断开定时器）
-```json
-"portInputs": [
-  {"name": "EN",  "value": "", "scope": "", "type": ""},
-  {"name": "IN",  "value": "变量名",          "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "PT",  "value": "Time_Xxx_Set",    "scope": "VAR_INPUT",  "type": "TIME"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "Q",   "value": "变量名",          "scope": "VAR_OUTPUT", "type": "BOOL"},
-  {"name": "ET",  "value": "Time_Xxx_Elapsed","scope": "VAR_OUTPUT", "type": "TIME"}
-],
-"varName": {"name": "", "value": "Tof_实例名", "type": "TOF", "scope": "VAR"}
-```
-
-### TP（脉冲定时器）
-```json
-"portInputs": [
-  {"name": "EN",  "value": "", "scope": "", "type": ""},
-  {"name": "IN",  "value": "变量名",          "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "PT",  "value": "Time_Xxx_Set",    "scope": "VAR_INPUT",  "type": "TIME"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "Q",   "value": "变量名",          "scope": "VAR_OUTPUT", "type": "BOOL"},
-  {"name": "ET",  "value": "Time_Xxx_Elapsed","scope": "VAR_OUTPUT", "type": "TIME"}
-],
-"varName": {"name": "", "value": "Tp_实例名", "type": "TP", "scope": "VAR"}
-```
-
-### SR（置位优先双稳态）
-```json
-"portInputs": [
-  {"name": "EN",  "value": "", "scope": "", "type": ""},
-  {"name": "S1",  "value": "变量名", "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "R",   "value": "变量名", "scope": "VAR_INPUT",  "type": "BOOL"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "Q1",  "value": "变量名", "scope": "VAR_OUTPUT", "type": "BOOL"}
-],
-"varName": {"name": "", "value": "Sr_实例名", "type": "SR", "scope": "VAR"}
-```
-
-### RS（复位优先双稳态）
-```json
-"portInputs": [
-  {"name": "EN",  "value": "", "scope": "", "type": ""},
-  {"name": "S",   "value": "变量名", "scope": "VAR_INPUT",  "type": "BOOL"},
-  {"name": "R1",  "value": "变量名", "scope": "VAR_INPUT",  "type": "BOOL"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "Q1",  "value": "变量名", "scope": "VAR_OUTPUT", "type": "BOOL"}
-],
-"varName": {"name": "", "value": "Rs_实例名", "type": "RS", "scope": "VAR"}
-```
-
-
-## 数值与比较函数引脚定义
-
-以下运行时元件类别为 `function`，因此 `childrenNode.isFunction` 必须为 `true`；外层 `type` 仍为 `FBDCompartment`。
-
-### ABS（绝对值）
-
-业务端口：`IN: ANY_NUM -> OUT: ANY_NUM`。
-
-```json
-"type": "ABS",
-"isFunction": true,
-"portInputs": [
-  {"name": "EN", "value": "", "scope": "", "type": ""},
-  {"name": "IN", "value": "Real_Sync_Difference", "scope": "VAR_INPUT", "type": "REAL"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "OUT", "value": "Real_Sync_Deviation", "scope": "VAR_OUTPUT", "type": "REAL"}
-],
-```
-
-### SUB（减法）
-
-业务端口：`IN1: ANY_NUM, IN2: ANY_NUM -> OUT: ANY_NUM`。
-
-```json
-"type": "SUB",
-"isFunction": true,
-"portInputs": [
-  {"name": "EN", "value": "", "scope": "", "type": ""},
-  {"name": "IN1", "value": "Real_Cylinder_A_Position", "scope": "VAR_INPUT", "type": "REAL"},
-  {"name": "IN2", "value": "Real_Cylinder_B_Position", "scope": "VAR_INPUT", "type": "REAL"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "OUT", "value": "Real_Sync_Difference", "scope": "VAR_OUTPUT", "type": "REAL"}
-],
-```
-
-### GT / GE / EQ / LT / LE / NE（比较）
-
-业务端口：`IN1: ANY, IN2: ANY -> OUT: BOOL`。比较结果端口名固定为 `OUT`，不得写成 `Q`。
-
-```json
-"type": "GT",
-"isFunction": true,
-"portInputs": [
-  {"name": "EN", "value": "", "scope": "", "type": ""},
-  {"name": "IN1", "value": "Real_Sync_Deviation", "scope": "VAR_INPUT", "type": "REAL"},
-  {"name": "IN2", "value": "Real_Sync_Deviation_Limit", "scope": "VAR_INPUT", "type": "REAL"}
-],
-"portOutputs": [
-  {"name": "ENO", "value": "", "scope": "", "type": ""},
-  {"name": "OUT", "value": "Sync_Deviation_Exceeded", "scope": "VAR_OUTPUT", "type": "BOOL"}
-],
-```
-
-### 函数无实例约束
-
-- `ABS`、`SUB`、`ADD`、`MUL`、`DIV`、`GT`、`GE`、`EQ`、`LT`、`LE`、`NE` 都是 IEC 61131-3 函数，不保存内部状态，不得命名或实例化。
-- 图形块标题只能显示函数类型，例如 `GT`；函数输入、输出通过 port 的 `value` 变量连接。
-
-### 函数输出约束
-
-- `ABS`、`SUB` 的输入和 OUT 必须使用一致的实际数值类型，例如均为 `REAL`。
-- 比较函数的 IN1 与 IN2 必须类型兼容，OUT 必须为 `BOOL`。
-- Q、ET、CV、Q1 与函数 OUT 均由 FBDCompartment 直接写入；严禁再用 `coil`、`setCoil` 或 `resetCoil` 写入同名变量。
-
-
----
-
-## 功能块 ID 命名
-```
-功能块：FBD-compartment-{TYPE}-{随机串}-{13位时间戳}
-函数：FUN-compartment-{TYPE}-{随机串}-{13位时间戳}
-```
+- [ ] 每个 FBD 节点均能在 `runtime-library.md` 查到同名 `function` 或 `functionBlock`
+- [ ] ID 前缀、`childrenNode.type`、`isFunction` 与库 `type` 一致
+- [ ] EN/ENO 后的全部端口名、顺序、数量、类型与库条目一致
+- [ ] 功能块有且仅有 `childrenNode.varName`；函数完全没有 `varName`
+- [ ] 每个 port 对象仅含四个规定字段
