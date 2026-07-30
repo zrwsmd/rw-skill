@@ -155,6 +155,81 @@ FBDCompartment 的 `varName` 必须放在 `childrenNode` 内部，FBDCompartment
 }
 ```
 
+## Step 2.6.6 FBD 端口类型与变量类型强制规则
+
+### 端口类型唯一来源
+
+对于每个 FBDCompartment，必须在 runtime-library.md 中查找
+childrenNode.type 对应函数或功能块的完整接口定义。
+
+childrenNode.portInputs 与 childrenNode.portOutputs 中每个端口的：
+
+- name
+- 输入或输出方向
+- type
+
+必须严格、逐字匹配 runtime-library.md。
+
+禁止根据业务场景、端口所连接的变量、变量名或推断出的工程量单位，
+修改、具体化或替换 runtime-library.md 的端口 type。
+
+### 泛型类型必须原样保留
+
+运行库出现以下泛型类型时，JSON 中必须原样写入：
+
+| runtime-library.md 类型 | JSON port.type 必须为 |
+| ----------------------- | --------------------- |
+| ANY                     | ANY                   |
+| ANYNUM                  | ANYNUM                |
+| ANYREAL                 | ANYREAL               |
+| ANYINT                  | ANYINT                |
+| ANYBIT                  | ANYBIT                |
+
+禁止进行如下替换：
+
+- ANY -> REAL
+- ANY -> INT
+- ANYNUM -> REAL
+- ANYREAL -> LREAL
+- ANYINT -> DINT
+
+### variableList 自动创建规则
+
+如果 port.value 引用的变量由本次 JSON 自动创建，则：
+
+variableList 中该变量的 type 必须与该端口的 port.type 完全一致。
+
+示例：
+
+- SEL.IN0 的 port.type 为 ANY，则其自动创建变量的 type 也必须为 ANY
+- LIMIT.OUT 的 port.type 为 ANY，则其自动创建变量的 type 也必须为 ANY
+- PID.PV 的 port.type 为 REAL，则其自动创建变量的 type 也必须为 REAL
+- TON.PT 的 port.type 为 TIME，则其自动创建变量的 type 也必须为 TIME
+
+对于同一变量被多个端口引用的情况：
+
+1. 所有引用端口的 type 必须完全一致；
+2. variableList 中变量的 type 必须与该共同端口类型一致；
+3. 如端口类型冲突，不得猜测或强制转换，必须拆分变量或使用运行库提供的显式类型转换函数。
+
+### EN / ENO 规则
+
+函数节点的 EN 和 ENO 也必须严格按运行库或既有编辑器导出格式生成。
+若真实编辑器导出的 EN/ENO type 为空，则保持为空；
+不得因为相邻控制信号是 BOOL 而擅自改为 BOOL。
+
+### 生成后强制校验
+
+输出 JSON 前，必须对每个 FBDCompartment 执行以下校验：
+
+1. 在 runtime-library.md 中定位 childrenNode.type；
+2. 校验 portInputs 与 portOutputs 的端口名称、顺序、方向、type；
+3. 校验每个自动创建的 port.value 在 variableList 中存在；
+4. 校验该自动创建变量的 variableList.type 等于 port.type；
+5. 任一项失败时，JSON 不合格，必须修复后再输出。
+
+不得以“业务变量实际应为 REAL”等理由，使泛型库端口或其自动创建变量偏离运行库定义。
+
 ### Step 3：建立拓扑关系（sourceIds / targetIds）
 
 **串联**：A → B → C

@@ -64,7 +64,10 @@
 - 除 EN/ENO 外，端口名称、顺序、数量、库类型及边沿属性必须逐项取自 `runtime-library.md`。
 - 每个端口对象严格只能有四个字段：`name`、`value`、`scope`、`type`。
 - 非 EN 输入使用 `scope: "VAR_INPUT"`；非 ENO 输出使用 `scope: "VAR_OUTPUT"`。
-- 库中的 `ANY`、`ANY_NUM` 等为约束；JSON 中端口的 `type` 必须填实际使用的兼容变量类型，不能填泛型占位符。
+- 库中的 `ANY`、`ANYNUM`、`ANYREAL`、`ANYINT`、`ANYBIT` 等泛型类型必须原样保留。
+  JSON 中端口的 `type` 必须逐字使用 `runtime-library.md` 对该端口声明的原始类型。
+  禁止根据业务场景、变量名称或连接变量的工程类型，将 `ANY`、`ANYNUM`、`ANYREAL`、
+  `ANYINT`、`ANYBIT` 具体化或改写为 `REAL`、`INT`、`DINT`、`LREAL` 等类型。
 
 ## 输出与实例
 
