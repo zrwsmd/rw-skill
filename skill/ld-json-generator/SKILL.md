@@ -67,7 +67,7 @@ description: >
 
 - 左母线固定为 `"start-node-line"`
 - 右母线（如有）固定为 `"end-node-line-{随机数}-{时间戳}"`
-- ENO连接节点固定为 `"edit-node-rect"`
+- 当前插入占位节点固定为 `"edit-node-rect"`，表示前端红色虚线框所在位置，不等同于 ENO 节点
 
 ⚠️ **同一变量在同一梯级中多次出现（如并联支路中重复使用），每次必须生成不同的节点 id，绝对不能复用同一个节点 id。**
 
@@ -278,16 +278,33 @@ D.sourceIds = [B.id, C.id]
 
 ### Step 4：构造 editRect
 
-每个 segment 必须有且仅有一个 `edit-node-rect`，位于最后一个触点/功能块与末端输出节点之间；末端输出节点可以是线圈或 endLine。
+`edit-node-rect` 是前端当前可编辑插入点，也就是红色虚线框对应的占位节点。它不是 IEC 语义节点，也不是固定 ENO 节点。
 
-- **串联回路**：`edit-node-rect.sourceIds` 仅包含主路径最后一个节点的 id。
-- **并联回路**：`edit-node-rect.sourceIds` 必须包含每条并联支路末节点的 id；每条支路末节点的 `targetIds` 都必须指向 `"edit-node-rect"`。
-- **并联后继续串联**：支路应先汇合到后续公共节点；`edit-node-rect.sourceIds` 只填写该公共节点的 id，不能直接填写各支路末节点。
+每个 segment 通常保留一个 `edit-node-rect`，位置由当前编辑点决定：
+
+- 可以位于左母线后：`start-node-line -> edit-node-rect -> 后续节点`
+- 可以位于普通节点之间：`前置节点 -> edit-node-rect -> 后续节点`
+- 可以位于并联支路汇合处：多条支路末节点共同指向 `edit-node-rect`
+- 可以位于最终输出前：`最后逻辑节点 -> edit-node-rect -> 线圈/endLine`
+
+如果用户只是要求生成一张完整梯形图、没有指定当前编辑位置，则默认把 `edit-node-rect` 放在本 segment 最后逻辑节点与末端输出节点之间；但不要把它理解成永远只能在末尾。
+
+- **串联回路的当前插入点在末端输出前**：`edit-node-rect.sourceIds` 仅包含主路径最后一个逻辑节点 id。
+- **并联回路直接进入当前插入点**：`edit-node-rect.sourceIds` 必须包含每条并联支路末节点 id；每条支路末节点的 `targetIds` 都必须指向 `"edit-node-rect"`。
+- **并联后继续串联，再进入当前插入点**：支路应先汇合到后续公共节点；`edit-node-rect.sourceIds` 只填写该公共节点 id，不能直接填写各支路末节点。
+- **当前插入点位于左母线后**：`edit-node-rect.sourceIds = ["start-node-line"]`，`start-node-line.targetIds = ["edit-node-rect"]`。
+- **当前插入点位于两个节点之间**：`edit-node-rect.sourceIds = [前置节点.id]`，`edit-node-rect.targetIds = [后续节点.id]`，并保持双向连接一致。
 
 ```text
 串联：
 Last_Node.targetIds = ["edit-node-rect"]
 edit-node-rect.sourceIds = [Last_Node.id]
+
+左母线后：
+start-node-line.targetIds = ["edit-node-rect"]
+edit-node-rect.sourceIds = ["start-node-line"]
+edit-node-rect.targetIds = [Next_Node.id]
+Next_Node.sourceIds = ["edit-node-rect"]
 
 并联后直接接线圈：
 Branch_A_Last.targetIds = ["edit-node-rect"]
@@ -308,8 +325,8 @@ edit-node-rect.sourceIds = [C.id]
 {
   "id": "edit-node-rect",
   "type": "editRect",
-  "sourceIds": ["最后节点id或各并联支路末节点id"],
-  "targetIds": ["coil1.id", "coil2.id"],
+  "sourceIds": ["当前插入点左侧节点id；可为start-node-line、单个节点或多个并联支路末节点"],
+  "targetIds": ["当前插入点右侧节点id；可为触点、功能块、线圈或endLine"],
   "children": [
     {
       "id": "edit-node-rect-left-port",
@@ -432,7 +449,7 @@ edit-node-rect.sourceIds = [C.id]
 - [ ] `note` 字段：无特殊工艺说明时为空，有关键互锁/时序假设时填写
 - [ ] 节点容器字段名是 `nodesObj`（对象），不是 `nodeDataArray` 或其他
 - [ ] 每个 segment 有 `edgesObj: {}`
-- [ ] `editRect.sourceIds`：串联时为最后节点；并联直连输出时包含全部支路末节点；并联后有公共节点时仅为公共节点
+- [ ] `editRect.sourceIds` / `targetIds` 体现当前红色虚线框的真实位置：左母线后、节点之间、并联汇合处、末端输出前都允许；并联后有公共节点时仅使用公共节点，不直接填写各支路末节点
 - [ ] **连通性检查**：对每个 segment 从 `start-node-line` 沿 `targetIds` 执行 BFS/DFS；`nodesObj` 中所有节点均被访问到，不存在悬空节点
 - [ ] `start-node-line.sourceIds` 固定为 `[]`，且其 `targetIds` 非空；除此以外所有节点的 `sourceIds` 均非空
 - [ ] 除线圈和 `endLine` 外，所有节点的 `targetIds` 均非空
@@ -440,7 +457,7 @@ edit-node-rect.sourceIds = [C.id]
 - [ ] 若 segment 以功能块输出结束，拓扑必须为 `FBDCompartment -> edit-node-rect -> endLine`
 - [ ] 功能块 portOutputs 中的 Q、ET、CV、Q1 等变量没有被 coil、setCoil 或 resetCoil 重复写入
 - [ ] 每个 FBDCompartment 外层**没有** varName，varName **在** childrenNode 内
-- [ ] 每个 port 条目**严格只有** name / value / scope / type 四个字段
+- [ ] 每个 port 条目最多包含 name / value / scope / type 四个字段；EN/ENO 的 type 可为空字符串，也可按真实导出格式省略
 - [ ] portInputs 第一项是 EN（scope: ""），portOutputs 第一项是 ENO（scope: ""）
 - [ ] 所有触点、线圈、FBDCompartment 都有 varName
 - [ ] startLine 有 Xlayer: 0 和 Ylayer: 0，无 varName

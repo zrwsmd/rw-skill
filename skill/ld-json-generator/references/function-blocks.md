@@ -60,9 +60,9 @@
 
 ## 端口规则
 
-- `portInputs` 第一项固定是 `EN`，`portOutputs` 第一项固定是 `ENO`；两者均为 `{"name":"EN/ENO","value":"","scope":"","type":""}`。
+- `portInputs` 第一项固定是 `EN`，`portOutputs` 第一项固定是 `ENO`；两者的 `value`、`scope` 为空，`type` 可为空字符串，也可按真实前端导出格式省略。
 - 除 EN/ENO 外，端口名称、顺序、数量、库类型及边沿属性必须逐项取自 `runtime-library.md`。
-- 每个端口对象严格只能有四个字段：`name`、`value`、`scope`、`type`。
+- 每个端口对象最多包含四个字段：`name`、`value`、`scope`、`type`。EN/ENO 的 `type` 可为空字符串，也可按真实前端导出格式省略。
 - 非 EN 输入使用 `scope: "VAR_INPUT"`；非 ENO 输出使用 `scope: "VAR_OUTPUT"`。
 - 库中的 `ANY`、`ANYNUM`、`ANYREAL`、`ANYINT`、`ANYBIT` 等泛型类型必须原样保留。
   JSON 中端口的 `type` 必须逐字使用 `runtime-library.md` 对该端口声明的原始类型。

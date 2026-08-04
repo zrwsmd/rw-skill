@@ -23,7 +23,7 @@
 |---|---|
 | `startLine` | 左母线；每个 segment 固定一个，id 固定为 `start-node-line` |
 | `endLine` | 右母线；空梯级或以 FBDCompartment 输出结束、无需输出线圈的梯级使用，id 格式为 `end-node-line-{8位随机数}-{13位时间戳}` |
-| `editRect` | ENO 连接中间节点；每个 segment 固定一个，id 固定为 `edit-node-rect` |
+| `editRect` | 当前插入占位节点；对应前端红色虚线框，不是 IEC 语义节点，也不是固定 ENO 节点。每个 segment 通常保留一个，id 固定为 `edit-node-rect` |
 | `FBDCompartment` | 功能块容器，包含 `childrenNode` |
 
 ## varName 携带规则
