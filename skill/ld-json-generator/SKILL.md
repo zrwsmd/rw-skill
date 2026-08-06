@@ -173,6 +173,26 @@ childrenNode.portInputs 与 childrenNode.portOutputs 中每个端口的：
 禁止根据业务场景、端口所连接的变量、变量名或推断出的工程量单位，
 修改、具体化或替换 runtime-library.md 的端口 type。
 
+### VAR_IN_OUT 端口映射（强制）
+
+`runtime-library.md` 保留源库的输入表和输出表。若同一元件的输入表与输出表中
+同时出现**名称和类型完全相同**的端口，则该重复项表示一个 `VAR_IN_OUT` 端口，
+不是两个独立端口。该规则同时适用于 `function` 与 `functionBlock`，不得按
+`MC_`、`SMC_` 等名称前缀或 `AXIS_REF` 等特定类型硬编码。
+
+生成 JSON 时必须执行以下归一化：
+
+1. 按端口名称和类型精确匹配输入、输出中的重复项；
+2. 在 `portInputs` 中按原输入顺序保留该端口一次，并设置 `scope: "VAR_IN_OUT"`；
+3. 从 `portOutputs` 中移除与其匹配的重复项；
+4. 普通输入使用 `scope: "VAR_INPUT"`，普通输出使用 `scope: "VAR_OUTPUT"`；
+5. `VAR_IN_OUT` 端口的 `value` 只引用一个变量，`variableList` 中也只声明一次；
+6. 若端口名称相同但类型不同，将其视为库定义冲突，不得猜测合并或擅自转换类型。
+
+例如库条目同时列出输入 `Axis: AXIS_REF` 和输出 `Axis: AXIS_REF` 时，JSON 中
+`Axis` 只出现在 `portInputs`，其 `scope` 为 `VAR_IN_OUT`，`portOutputs` 不再包含
+`Axis`。完整渲染示例见 `references/function-blocks.md`。
+
 ### 泛型类型必须原样保留
 
 运行库出现以下泛型类型时，JSON 中必须原样写入：
@@ -223,10 +243,11 @@ variableList 中该变量的 type 必须与该端口的 port.type 完全一致�
 输出 JSON 前，必须对每个 FBDCompartment 执行以下校验：
 
 1. 在 runtime-library.md 中定位 childrenNode.type；
-2. 校验 portInputs 与 portOutputs 的端口名称、顺序、方向、type；
-3. 校验每个自动创建的 port.value 在 variableList 中存在；
-4. 校验该自动创建变量的 variableList.type 等于 port.type；
-5. 任一项失败时，JSON 不合格，必须修复后再输出。
+2. 先识别输入与输出中名称、类型均相同的 `VAR_IN_OUT` 端口，再校验归一化后的端口名称、顺序、方向、scope 和 type；
+3. 校验每个 `VAR_IN_OUT` 端口只存在于 portInputs，且未在 portOutputs 中重复；
+4. 校验每个自动创建的 port.value 在 variableList 中存在；
+5. 校验该自动创建变量的 variableList.type 等于 port.type；
+6. 任一项失败时，JSON 不合格，必须修复后再输出。
 
 不得以“业务变量实际应为 REAL”等理由，使泛型库端口或其自动创建变量偏离运行库定义。
 
@@ -459,6 +480,8 @@ edit-node-rect.sourceIds = [C.id]
 - [ ] 每个 FBDCompartment 外层**没有** varName，varName **在** childrenNode 内
 - [ ] 每个 port 条目最多包含 name / value / scope / type 四个字段；EN/ENO 的 type 可为空字符串，也可按真实导出格式省略
 - [ ] portInputs 第一项是 EN（scope: ""），portOutputs 第一项是 ENO（scope: ""）
+- [ ] 运行库输入与输出中名称、类型完全相同的端口已归一化为 `VAR_IN_OUT`：只在 portInputs 中出现一次，scope 为 `VAR_IN_OUT`，portOutputs 中无重复项
+- [ ] 除 EN/ENO 与 `VAR_IN_OUT` 外，普通输入 scope 为 `VAR_INPUT`，普通输出 scope 为 `VAR_OUTPUT`
 - [ ] 所有触点、线圈、FBDCompartment 都有 varName
 - [ ] startLine 有 Xlayer: 0 和 Ylayer: 0，无 varName
 - [ ] startLine / endLine / editRect 没有 varName
@@ -508,11 +531,12 @@ edit-node-rect.sourceIds = [C.id]
 `references/runtime-library.md` 是元件定义的唯一真源，优先级高于本 Skill 内的示例、常用元件清单、端口样例和 `function-blocks.md` 的示例。若任何旧示例与运行时库冲突，必须以运行时库为准。
 
 - 运行时库定义只查询 `references/runtime-library.md`；不得自行推断或改写库名称、端口及数据类型。
+- 运行时库输入与输出中名称、类型完全相同的端口按 `VAR_IN_OUT` 渲染规则归一化；这属于前端 JSON 映射，不是对库定义的改写。
 - 本 Skill 中的 CTU、TON、ABS、GT、PID、类型转换等文字或 JSON 均仅为渲染格式示例，不构成完整端口定义。
 - 使用未在示例列出的库函数、功能块或数据类型时同样允许，但必须先查运行时库并遵守其原始定义。
 
 输出前额外核验：
 
 - [ ] 每个使用的运行时元件均在 `runtime-library.md` 中找到，且名称逐字符一致。
-- [ ] 业务端口、实例规则、库 type、ID 前缀和 `isFunction` 全部与库条目一致。
+- [ ] 业务端口、`VAR_IN_OUT` 归一化结果、实例规则、库 type、ID 前缀和 `isFunction` 全部与库条目及前端映射规则一致。
 - [ ] `struct` 成员、`enum` 值、`derived` 基础类型/默认值均从库文件获取，且未被建模为 FBD 节点。
