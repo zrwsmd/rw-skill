@@ -1,0 +1,210 @@
+{
+  "type": "graph",
+  "id": "graph",
+  "name": "screen",
+  "size": {
+    "width": 800,
+    "height": 600
+  },
+  "backgroundColor": "#ffffff",
+  "children": [
+    {
+      "type": "button",
+      "id": "button_start1",
+      "visible": true,
+      "name": "button_start1",
+      "size": {
+        "width": 88,
+        "height": 32
+      },
+      "event": "toggler",
+      "value": {
+        "valueType": [
+          "BOOL"
+        ],
+        "variableType": "",
+        "variableName": "",
+        "value": false
+      },
+      "text": "启动",
+      "backgroundColor": "#409eff",
+      "fontColor": "#ffffff",
+      "fontSize": 12,
+      "selectedBackgroundColor": "#409eff",
+      "selectedFontColor": "#ffffff",
+      "selectedFontSize": 12,
+      "borderWidth": 0,
+      "borderColor": "#409eff",
+      "borderRadius": 0,
+      "position": {
+        "x": 40,
+        "y": 100
+      }
+    },
+    {
+      "type": "button",
+      "id": "button_stop01",
+      "visible": true,
+      "name": "button_stop01",
+      "size": {
+        "width": 88,
+        "height": 32
+      },
+      "event": "toggler",
+      "value": {
+        "valueType": [
+          "BOOL"
+        ],
+        "variableType": "",
+        "variableName": "",
+        "value": false
+      },
+      "text": "停止",
+      "backgroundColor": "#409eff",
+      "fontColor": "#ffffff",
+      "fontSize": 12,
+      "selectedBackgroundColor": "#409eff",
+      "selectedFontColor": "#ffffff",
+      "selectedFontSize": 12,
+      "borderWidth": 0,
+      "borderColor": "#409eff",
+      "borderRadius": 0,
+      "position": {
+        "x": 40,
+        "y": 148
+      }
+    },
+    {
+      "type": "button",
+      "id": "button_reset",
+      "visible": true,
+      "name": "button_reset",
+      "size": {
+        "width": 88,
+        "height": 32
+      },
+      "event": "toggler",
+      "value": {
+        "valueType": [
+          "BOOL"
+        ],
+        "variableType": "",
+        "variableName": "",
+        "value": false
+      },
+      "text": "复位",
+      "backgroundColor": "#409eff",
+      "fontColor": "#ffffff",
+      "fontSize": 12,
+      "selectedBackgroundColor": "#409eff",
+      "selectedFontColor": "#ffffff",
+      "selectedFontSize": 12,
+      "borderWidth": 0,
+      "borderColor": "#409eff",
+      "borderRadius": 0,
+      "position": {
+        "x": 40,
+        "y": 196
+      }
+    },
+    {
+      "type": "light",
+      "id": "light_run001",
+      "name": "light_run001",
+      "visible": true,
+      "value": {
+        "valueType": [
+          "BOOL"
+        ],
+        "variableType": "",
+        "variableName": "PLC.Motor.Run",
+        "value": false
+      },
+      "size": {
+        "width": 100,
+        "height": 100
+      },
+      "startColor": "#75593E",
+      "backgroundImage": "Green",
+      "position": {
+        "x": 220,
+        "y": 80
+      }
+    },
+    {
+      "type": "light",
+      "id": "light_fault1",
+      "name": "light_fault1",
+      "visible": true,
+      "value": {
+        "valueType": [
+          "BOOL"
+        ],
+        "variableType": "",
+        "variableName": "PLC.Motor.Fault",
+        "value": false
+      },
+      "size": {
+        "width": 100,
+        "height": 100
+      },
+      "startColor": "#75593E",
+      "backgroundImage": "Gray",
+      "position": {
+        "x": 340,
+        "y": 80
+      }
+    },
+    {
+      "type": "meter180",
+      "id": "meter180rpm",
+      "visible": true,
+      "radius": 143,
+      "name": "meter180rpm",
+      "value": {
+        "valueType": [
+          "BYTE",
+          "WORD",
+          "DWORD",
+          "LWORD",
+          "SINT",
+          "USINT",
+          "INT",
+          "UINT",
+          "DINT",
+          "UDINT",
+          "LINT"
+        ],
+        "variableType": "",
+        "variableName": "PLC.Motor.Speed",
+        "value": 1450
+      },
+      "size": {
+        "width": 252,
+        "height": 139,
+        "r": 10
+      },
+      "axisLine.lineStyle.color": [
+        [
+          0.3,
+          "#67e0e3"
+        ],
+        [
+          0.7,
+          "#37a2da"
+        ],
+        [
+          1,
+          "#fd666d"
+        ]
+      ],
+      "startValue": 0,
+      "endValue": 3000,
+      "splitNumber": 5,
+      "position": {
+        "x": 510,
+        "y": 210
+      }
+    }
+  ]
+}
