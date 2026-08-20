@@ -1,26 +1,32 @@
 ---
 name: hmi-json-generator
-description: 将工控/HMI中文自然语言需求转换为现有渲染器可加载的 graph JSON。
+description: 根据中文工控/HMI业务需求自动生成可渲染的 graph JSON。
 version: 1.1.0
 language: zh-CN
 output: json
 ---
 
-# HMI JSON Generator Skill
+# HMI JSON Generator
 
 ## 目标
 
-根据用户描述的工控业务画面生成一个合法 `graph` JSON。用户只需描述业务对象、功能、信息、视觉偏好及（可选）真实变量；不要要求用户提供坐标、尺寸、颜色或 JSON 字段。Skill 自动完成组件选型、信息分区、布局、尺寸和默认样式。
+将用户用自然语言描述的工控/HMI画面需求，自动转换为单个合法 `graph` JSON。用户只需说明业务场景、功能、信息、视觉偏好及可选的真实变量；Skill 自动完成组件选型、界面分区、布局、尺寸、默认样式与合法 JSON 输出。
 
-最终回答只能输出一个 JSON 对象，不包含 Markdown、解释、注释或省略号。
+最终输出只能是单个 JSON 对象，不要输出 Markdown、说明、注释或省略号。
 
-## 首要规则：变量绑定显式确认
+## 变量绑定规则
 
-1. 仅当用户明确给出项目中的真实变量完整路径，或上游变量目录同时提供变量名与兼容类型时，才填写 `value.variableName`。
-2. 用户只说“启动、停止、复位、液位、温度、压力、运行状态”等业务语义时，所有组件必须使用 `"variableName": ""`；绝不推测 `PLC.Motor.StartCmd`、`PLC.Tank.Level` 等路径。
-3. `valueType` 是组件可支持的数据类型声明，不能证明变量存在。无法确认变量存在或类型时，保持空绑定。
-4. BOOL 写入/显示组件使用 `["BOOL"]`；整数数值组件用 `NUMERIC_INT_TYPES`；`numberInput` 用 `NUMERIC_REAL_TYPES`；`textarea` 使用 `"STRING"`。
-5. 对按钮、开关等可写 BOOL 控件，只有已确认的可写 BOOL 变量才允许绑定；否则保留空绑定。
+1. 只有用户明确提供项目中存在的变量完整路径，或上游变量目录同时确认变量名及兼容类型时，才可以填写 `value.variableName`。
+2. 用户只描述“启动、停止、复位、液位、温度、压力、运行状态”等业务语义时，必须生成空绑定：
+
+```json
+"value":{"variableType":"","variableName":""}
+```
+
+3. 不得依据业务含义推测或生成 PLC 变量路径，例如 `PLC.Motor.StartCmd`、`PLC.Motor.StopCmd`、`PLC.Tank.Level`。
+4. `valueType` 仅表示组件支持的数据类型，不能证明变量存在或可以绑定。
+5. `button`、`switch`、`checkbox`、`open`、`dipSwitch`、`powerSwitch` 等写入型控件，只有在目标变量确认是可写 `BOOL` 时才可以绑定。
+6. 变量路径无法解析、类型未知、类型不兼容或变量不可写时，也必须保持 `variableName:""`。
 
 ```text
 NUMERIC_INT_TYPES = ["BYTE","WORD","DWORD","LWORD","SINT","USINT","INT","UINT","DINT","UDINT","LINT"]
@@ -29,7 +35,7 @@ NUMERIC_REAL_TYPES = NUMERIC_INT_TYPES + ["REAL","LREAL"]
 
 ## 根节点
 
-默认画布为 800×600，白色或浅灰背景：
+默认生成 800×600 画布：
 
 ```json
 {"type":"graph","id":"graph","name":"screen","size":{"width":800,"height":600},"backgroundColor":"#ffffff","children":[]}
@@ -37,81 +43,77 @@ NUMERIC_REAL_TYPES = NUMERIC_INT_TYPES + ["REAL","LREAL"]
 
 ## 生成流程
 
-1. 理解业务场景，例如电机、水箱、温控、空压机、输送线。
-2. 识别控制、状态、设定、读数、趋势和报警需求。
-3. 按组件语义选择类型；不要仅按外观替换组件。
-4. 自动采用清晰的工控布局：标题在顶部；主要控制放左侧或底部；关键状态靠近控制；主要工艺图/仪表位于中心或右侧；同类控件对齐且不重叠。
-5. 根据 800×600 默认画布自动生成合理尺寸、间距和位置。用户明确画布、位置或视觉风格时再覆盖默认布局。
-6. 为所有组件创建唯一 `id` 和同值 `name`；除 `graph` 外默认 `visible:true`。
-7. 输出前按“校验清单”校验。
+1. 解析业务对象及功能，例如电机控制、水箱监控、温控、空压机、输送线。
+2. 识别控制、状态、设定、读数、报警、趋势和页面结构需求。
+3. 根据组件语义选择组件，优先区分显示、操作、数值设定及趋势图。
+4. 自动布局：顶部标题；控制放左侧或下方；状态紧邻控制；主要工艺图或仪表置于中心/右侧；保持对齐、不重叠并留出 16 px 以上间距。
+5. 默认使用 800×600 和工业蓝灰配色。用户明确要求画布尺寸、位置、颜色、样式时优先采用用户要求。
+6. 为每个组件生成唯一 `id` 和 `name`，默认 `name===id`，默认 `visible:true`。
+7. 按“输出前校验”检查后，只输出 JSON。
 
 ## 组件选择
 
-| 用户意图 | 组件 type |
+| 意图 | type |
 |---|---|
 | 圆、圆形 | `base:circle` |
-| 矩形、正方形、面板底板 | `base:rect` |
+| 矩形、面板、方块 | `base:rect` |
 | 椭圆 | `base:ellipse` |
-| 多边形、星形、等边三角形、封闭轮廓 | `base:shape` |
-| 管道、开放折线、多线段 | `base:polyline` |
+| 自由多边形、星形、等边三角形 | `base:shape` |
+| 管道、折线、多线段 | `base:polyline` |
 | 扇形、半圆扇形 | `base:sector` |
 | 指示灯 | `light` |
-| 拨动/DIP/电源开关 | `open` / `dipSwitch` / `powerSwitch` |
-| 常规控制按钮 | `button` |
-| 复选项/紧凑 Toggle | `checkbox` / `switch` |
-| 通用值输入/精确数值输入/多行文本 | `input` / `numberInput` / `textarea` |
-| 下拉枚举 | `select` |
-| 数值旋钮 | `potentiometer360` |
-| 半圆/圆弧仪表 | `meter180` / `meter360` |
-| 标尺/线性可调/线性只读进度 | `barDisplay` / `slider` / `progress` |
-| 圆弧可调/圆弧只读进度 | `arcSlider` / `arc` |
-| 静态标签/只读变量值 | `text` / `output` |
-| 一维趋势/XY关系 | `trace` / `xyChart` |
-| 表格/容器/Tab页 | `table` / `node:container` / `node:tabView` |
+| 普通、DIP、电源开关 | `open`、`dipSwitch`、`powerSwitch` |
+| 启动、停止、复位等按钮 | `button` |
+| 复选项、紧凑开关 | `checkbox`、`switch` |
+| 通用输入、精确数字输入、多行文本 | `input`、`numberInput`、`textarea` |
+| 下拉选择 | `select` |
+| 旋钮设定 | `potentiometer360` |
+| 半圆、圆弧仪表 | `meter180`、`meter360` |
+| 标尺、可调滑条、只读进度 | `barDisplay`、`slider`、`progress` |
+| 圆弧可调、圆弧进度 | `arcSlider`、`arc` |
+| 标签、只读值 | `text`、`output` |
+| 趋势、XY 图 | `trace`、`xyChart` |
+| 表格、容器、选项卡 | `table`、`node:container`、`node:tabView` |
 
-## 关键区别
+## 关键语义
 
-- `light` 只显示 BOOL 状态；`button`、`switch`、`checkbox`、`open`、`dipSwitch`、`powerSwitch` 是可操作 BOOL 控件并设置 `event:"toggler"`。
-- `progress`、`arc` 是只读显示；`slider`、`arcSlider` 是用户设定。
-- `trace` 的数据是 `[y1,y2,...]`；`xyChart` 数据是 `[[x1,y1],...]`。
-- 用户说圆用 `base:circle`，说椭圆用 `base:ellipse`。
-- 用户说等边三角形用 `base:shape`，宽度为 w 时高度为 `round(0.866*w,2)`，点集为 `[{x:w/2,y:0},{x:0,y:h},{x:w,y:h}]`，`segments:[1,2,2]`。
+- `light` 是只读 BOOL 状态显示；`button`、`switch`、`checkbox`、`open`、`dipSwitch`、`powerSwitch` 是可操作 BOOL 控件，使用 `event:"toggler"`。
+- `progress`、`arc` 是只读数值显示；`slider`、`arcSlider` 是数值设定。
+- `trace` 使用一维数据 `[y1,y2,...]`；`xyChart` 使用点对 `[[x1,y1],...]`。
+- 用户明确说“圆”使用 `base:circle`，说“椭圆”使用 `base:ellipse`。
+- 等边三角形使用 `base:shape`：宽度为 `w`，高度为 `round(0.866*w,2)`，点集 `[{x:w/2,y:0},{x:0,y:h},{x:w,y:h}]`，`segments:[1,2,2]`。
+- `base:polyline` 可用于工艺管路及流向：虚线用 `isDashed:true`；虚线流动用 `isDashFlowing:true`。仅使用已确认的直线路径模式：首个 `segments` 值为 `1`，其余为 `2`。
 
-## 默认布局与样式
+## 默认规则
 
-- 默认 800×600；外边距 32 px；组件间距至少 16 px。
-- 用户不指定尺寸时采用 `references/component-defaults.json` 的默认值。
-- 默认工业蓝灰样式：文字 `#333333`，主控件 `#409eff`，背景 `#ffffff` 或 `#f6f8fb`。
-- 运行灯默认资源 `Green`，其他灯可使用 `Gray`；不得生成未知资源名。
-- 路径仅使用已验证的直线段模式：`segments` 数量与 `points` 相同，首元素为 `1`，其余为 `2`。
+详细默认尺寸、支持类型和字段约束见 `references/component-defaults.json`。
 
-## 数据与结构规则
+- 未指定数值量程时，默认 `startValue:0`、`endValue:100`、预览值 `10`。
+- 预览值必须位于量程内。
+- `numberInput.value.value` 是字符串，例如 `"0"`。
+- `textarea.textLength` 必须等于 `textarea.value.maxLength`。
+- `select.value.value` 必须与某项 `options[].value` 相同。
+- 运行灯图片默认 `Green`，未激活/故障预览可使用 `Gray`；不得创造未知资源名。
+- 无真实趋势数据时可使用设计预览数据，但不得说它是生产数据，也不得虚构实时绑定字段。
+- `node:tabView.children` 只允许 `node:tab`；`currentItem` 必须是有效索引。
 
-- 数值量程未指定时使用 0–100，预览值 10，并保证预览值落在量程内。
-- `numberInput.value.value` 保持字符串，例如 `"0"`。
-- `textarea.value.maxLength` 必须等于 `textLength`。
-- `select.value.value` 必须存在于 `options[].value`。
-- `node:tabView.children` 只包含 `node:tab`；`currentItem` 是有效索引。
-- 表格 `rowData` 是二维数组，单元格为 `{"variable":"","value":...}`；只有确认变量时才填 `variable`。
-- 图表没有真实数据时仅使用设计预览数据，不宣称为生产数据；不得虚构实时绑定字段。
+## 输出前校验
 
-## 校验清单
+- 输出为一个合法 JSON 对象，根节点是 `graph`。
+- `id` 全局唯一，`name` 默认与 `id` 一致。
+- 组件位置和尺寸合法，默认画布中不越界、不重叠。
+- 未由用户明确提供或变量目录验证的变量，所有 `value.variableName` 必须为空字符串。
+- BOOL 控件使用 BOOL 类型声明；数值初值在范围内；文本域、选择器和 Tab 满足对应约束。
+- 仅生成已确认的组件 type、字段和资源。
 
-- 输出为单一合法 JSON 对象，根节点是 `graph`。
-- 所有 id 唯一，name 默认等于 id。
-- 坐标、尺寸合法，默认画布下组件不重叠且不越界。
-- 未明确提供或验证的变量，所有 `variableName` 必须是空字符串。
-- BOOL 控件仅使用 BOOL 支持声明；数值值在量程内。
-- 仅使用已确认的 type、字段和资源。
+## 空绑定示例
 
-## 示例：无变量绑定
+用户：“生成启动、停止、复位按钮。”
 
-用户：“做一个电机控制画面，有启动、停止、复位按钮，显示运行和故障状态。”
-
-即使按钮和灯有明确业务含义，在用户未提供真实工程变量时，必须生成：
+正确做法：按钮 `value` 必须包含：
 
 ```json
-"value":{"valueType":["BOOL"],"variableType":"","variableName":"","value":false}
+{"valueType":["BOOL"],"variableType":"","variableName":"","value":false}
 ```
 
-不要生成假设路径。后续用户提供例如 `GVL_Motor.bStopCmd` 且确认其为可写 BOOL 后，才可写入 `variableName`。
+而不是自动生成任何 PLC 变量路径。用户后续明确提供且确认类型兼容的变量后，才填写 `variableName`。

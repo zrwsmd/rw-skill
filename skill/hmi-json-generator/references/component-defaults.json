@@ -1,5 +1,5 @@
 {
-  "componentTypes": [
+  "types": [
     "base:circle",
     "base:rect",
     "base:ellipse",
@@ -34,132 +34,129 @@
     "node:tabView",
     "node:tab"
   ],
-  "defaults": {
-    "base:circle": {
-      "width": 100,
-      "height": 100,
-      "r": 10
-    },
-    "base:rect": {
-      "width": 100,
-      "height": 100
-    },
-    "base:ellipse": {
-      "width": 100,
-      "height": 60,
-      "r": 10
-    },
-    "light": {
-      "width": 100,
-      "height": 100
-    },
-    "open": {
-      "width": 78,
-      "height": 104
-    },
-    "dipSwitch": {
-      "width": 100,
-      "height": 100
-    },
-    "powerSwitch": {
-      "width": 100,
-      "height": 100
-    },
-    "button": {
-      "width": 88,
-      "height": 32
-    },
-    "input": {
-      "width": 100,
-      "height": 34
-    },
-    "output": {
-      "width": 100,
-      "height": 34
-    },
-    "text": {
-      "width": 70,
-      "height": 24
-    },
-    "checkbox": {
-      "width": 120,
-      "height": 24
-    },
-    "textarea": {
-      "width": 100,
-      "height": 50
-    },
-    "switch": {
-      "width": 58,
-      "height": 24
-    },
-    "slider": {
-      "width": 200,
-      "height": 10
-    },
-    "numberInput": {
-      "width": 150,
-      "height": 30
-    },
-    "progress": {
-      "width": 200,
-      "height": 10
-    },
-    "select": {
-      "width": 150,
-      "height": 24
-    },
-    "arc": {
-      "width": 100,
-      "height": 100
-    },
-    "arcSlider": {
-      "width": 100,
-      "height": 100
-    },
-    "potentiometer360": {
-      "width": 200,
-      "height": 200
-    },
-    "meter180": {
-      "width": 252,
-      "height": 139
-    },
-    "meter360": {
-      "width": 300,
-      "height": 300
-    },
-    "barDisplay": {
-      "width": 350,
-      "height": 50
-    },
-    "trace": {
-      "width": 200,
-      "height": 200
-    },
-    "xyChart": {
-      "width": 200,
-      "height": 200
-    },
-    "table": {
-      "width": 150,
-      "height": 90
-    },
-    "node:container": {
-      "width": 150,
-      "height": 150
-    },
-    "node:tabView": {
-      "width": 254,
-      "height": 254
-    }
+  "defaultSizes": {
+    "base:circle": [
+      100,
+      100
+    ],
+    "base:rect": [
+      100,
+      100
+    ],
+    "base:ellipse": [
+      100,
+      60
+    ],
+    "light": [
+      100,
+      100
+    ],
+    "open": [
+      78,
+      104
+    ],
+    "dipSwitch": [
+      100,
+      100
+    ],
+    "powerSwitch": [
+      100,
+      100
+    ],
+    "button": [
+      88,
+      32
+    ],
+    "input": [
+      100,
+      34
+    ],
+    "output": [
+      100,
+      34
+    ],
+    "text": [
+      70,
+      24
+    ],
+    "checkbox": [
+      120,
+      24
+    ],
+    "textarea": [
+      100,
+      50
+    ],
+    "switch": [
+      58,
+      24
+    ],
+    "slider": [
+      200,
+      10
+    ],
+    "numberInput": [
+      150,
+      30
+    ],
+    "progress": [
+      200,
+      10
+    ],
+    "select": [
+      150,
+      24
+    ],
+    "arc": [
+      100,
+      100
+    ],
+    "arcSlider": [
+      100,
+      100
+    ],
+    "potentiometer360": [
+      200,
+      200
+    ],
+    "meter180": [
+      252,
+      139
+    ],
+    "meter360": [
+      300,
+      300
+    ],
+    "barDisplay": [
+      350,
+      50
+    ],
+    "trace": [
+      200,
+      200
+    ],
+    "xyChart": [
+      200,
+      200
+    ],
+    "table": [
+      150,
+      90
+    ],
+    "node:container": [
+      150,
+      150
+    ],
+    "node:tabView": [
+      254,
+      254
+    ]
   },
-  "bindingPolicy": {
-    "unverifiedVariableName": "",
-    "boolValueType": [
+  "binding": {
+    "BOOL": [
       "BOOL"
     ],
-    "integerValueTypes": [
+    "INTEGER": [
       "BYTE",
       "WORD",
       "DWORD",
@@ -172,10 +169,30 @@
       "UDINT",
       "LINT"
     ],
-    "numberInputExtraTypes": [
+    "NUMBER_INPUT_EXTRA": [
       "REAL",
       "LREAL"
     ],
-    "textareaValueType": "STRING"
+    "STRING": "STRING",
+    "unverifiedVariableName": ""
+  },
+  "pathDefaults": {
+    "backgroundColor": "#FFFFFF",
+    "strokeColor": "#000000",
+    "strokeWidth": 4,
+    "isDashed": false,
+    "dashLength": 4,
+    "dashGap": 4,
+    "dashGapColor": "#ffffff",
+    "isDashFlowing": false,
+    "dashFlowDirection": "forward",
+    "dashFlowDistance": 20,
+    "isImageFlowing": false,
+    "flowDirection": "forward",
+    "flowImage": "./img/radioCkecked.png",
+    "flowImageSize": 12,
+    "flowImageCount": 1,
+    "flowImageDistance": 30,
+    "flowImageDuration": 3
   }
 }
