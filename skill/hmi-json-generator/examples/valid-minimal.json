@@ -1,0 +1,132 @@
+{
+  "type": "graph",
+  "id": "graph",
+  "name": "screen",
+  "size": {
+    "width": 800,
+    "height": 600
+  },
+  "backgroundColor": "#ffffff",
+  "children": [
+    {
+      "type": "text",
+      "id": "text_title01",
+      "name": "text_title01",
+      "visible": true,
+      "size": {
+        "width": 180,
+        "height": 24
+      },
+      "color": "#333333",
+      "content": "输送线控制",
+      "fontSize": 18,
+      "borderWidth": 0,
+      "borderColor": "#cccccc",
+      "borderRadius": 0,
+      "backgroundColor": "#ffffff",
+      "mode": "Wrap",
+      "textAlign": "left",
+      "position": {
+        "x": 32,
+        "y": 24
+      }
+    },
+    {
+      "type": "base:rect",
+      "id": "base:rect_belt01",
+      "name": "base:rect_belt01",
+      "visible": true,
+      "size": {
+        "width": 560,
+        "height": 80
+      },
+      "backgroundColor": "#7a8793",
+      "position": {
+        "x": 120,
+        "y": 260
+      }
+    },
+    {
+      "type": "base:polyline",
+      "id": "base:polyline_flow01",
+      "name": "base:polyline_flow01",
+      "visible": true,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#ffffff",
+      "strokeWidth": 4,
+      "isDashed": true,
+      "dashLength": 14,
+      "dashGap": 10,
+      "dashGapColor": "#7a8793",
+      "isDashFlowing": true,
+      "dashFlowDirection": "forward",
+      "dashFlowDistance": 20,
+      "isImageFlowing": false,
+      "flowDirection": "forward",
+      "flowImage": "./img/radioCkecked.png",
+      "flowImageSize": 12,
+      "flowImageCount": 1,
+      "flowImageDistance": 30,
+      "flowImageDuration": 3,
+      "position": {
+        "x": 130,
+        "y": 300
+      },
+      "size": {
+        "width": 540,
+        "height": 1
+      },
+      "pointsSize": {
+        "width": 540,
+        "height": 1
+      },
+      "segments": [
+        1,
+        2
+      ],
+      "points": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 540,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "id": "button_start01",
+      "name": "button_start01",
+      "visible": true,
+      "event": "toggler",
+      "size": {
+        "width": 88,
+        "height": 32
+      },
+      "value": {
+        "valueType": [
+          "BOOL"
+        ],
+        "variableType": "",
+        "variableName": "",
+        "value": false
+      },
+      "text": "启动",
+      "backgroundColor": "#409eff",
+      "fontColor": "#ffffff",
+      "fontSize": 12,
+      "selectedBackgroundColor": "#409eff",
+      "selectedFontColor": "#ffffff",
+      "selectedFontSize": 12,
+      "borderWidth": 0,
+      "borderColor": "#409eff",
+      "borderRadius": 0,
+      "position": {
+        "x": 40,
+        "y": 100
+      }
+    }
+  ]
+}
