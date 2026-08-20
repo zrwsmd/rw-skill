@@ -1,0 +1,181 @@
+{
+  "componentTypes": [
+    "base:circle",
+    "base:rect",
+    "base:ellipse",
+    "base:shape",
+    "base:polyline",
+    "base:sector",
+    "light",
+    "open",
+    "dipSwitch",
+    "powerSwitch",
+    "potentiometer360",
+    "meter180",
+    "meter360",
+    "barDisplay",
+    "trace",
+    "xyChart",
+    "input",
+    "output",
+    "text",
+    "button",
+    "checkbox",
+    "textarea",
+    "switch",
+    "slider",
+    "numberInput",
+    "progress",
+    "select",
+    "arc",
+    "arcSlider",
+    "table",
+    "node:container",
+    "node:tabView",
+    "node:tab"
+  ],
+  "defaults": {
+    "base:circle": {
+      "width": 100,
+      "height": 100,
+      "r": 10
+    },
+    "base:rect": {
+      "width": 100,
+      "height": 100
+    },
+    "base:ellipse": {
+      "width": 100,
+      "height": 60,
+      "r": 10
+    },
+    "light": {
+      "width": 100,
+      "height": 100
+    },
+    "open": {
+      "width": 78,
+      "height": 104
+    },
+    "dipSwitch": {
+      "width": 100,
+      "height": 100
+    },
+    "powerSwitch": {
+      "width": 100,
+      "height": 100
+    },
+    "button": {
+      "width": 88,
+      "height": 32
+    },
+    "input": {
+      "width": 100,
+      "height": 34
+    },
+    "output": {
+      "width": 100,
+      "height": 34
+    },
+    "text": {
+      "width": 70,
+      "height": 24
+    },
+    "checkbox": {
+      "width": 120,
+      "height": 24
+    },
+    "textarea": {
+      "width": 100,
+      "height": 50
+    },
+    "switch": {
+      "width": 58,
+      "height": 24
+    },
+    "slider": {
+      "width": 200,
+      "height": 10
+    },
+    "numberInput": {
+      "width": 150,
+      "height": 30
+    },
+    "progress": {
+      "width": 200,
+      "height": 10
+    },
+    "select": {
+      "width": 150,
+      "height": 24
+    },
+    "arc": {
+      "width": 100,
+      "height": 100
+    },
+    "arcSlider": {
+      "width": 100,
+      "height": 100
+    },
+    "potentiometer360": {
+      "width": 200,
+      "height": 200
+    },
+    "meter180": {
+      "width": 252,
+      "height": 139
+    },
+    "meter360": {
+      "width": 300,
+      "height": 300
+    },
+    "barDisplay": {
+      "width": 350,
+      "height": 50
+    },
+    "trace": {
+      "width": 200,
+      "height": 200
+    },
+    "xyChart": {
+      "width": 200,
+      "height": 200
+    },
+    "table": {
+      "width": 150,
+      "height": 90
+    },
+    "node:container": {
+      "width": 150,
+      "height": 150
+    },
+    "node:tabView": {
+      "width": 254,
+      "height": 254
+    }
+  },
+  "bindingPolicy": {
+    "unverifiedVariableName": "",
+    "boolValueType": [
+      "BOOL"
+    ],
+    "integerValueTypes": [
+      "BYTE",
+      "WORD",
+      "DWORD",
+      "LWORD",
+      "SINT",
+      "USINT",
+      "INT",
+      "UINT",
+      "DINT",
+      "UDINT",
+      "LINT"
+    ],
+    "numberInputExtraTypes": [
+      "REAL",
+      "LREAL"
+    ],
+    "textareaValueType": "STRING"
+  }
+}

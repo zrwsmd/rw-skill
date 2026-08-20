@@ -1,23 +1,46 @@
 {
   "type": "graph",
   "id": "graph",
-  "name": "screen",
+  "name": "motor_control",
   "size": {
     "width": 800,
     "height": 600
   },
-  "backgroundColor": "#ffffff",
+  "backgroundColor": "#f6f8fb",
   "children": [
     {
-      "type": "button",
-      "id": "button_start1",
+      "type": "text",
+      "id": "text_title001",
+      "name": "text_title001",
       "visible": true,
-      "name": "button_start1",
+      "size": {
+        "width": 200,
+        "height": 30
+      },
+      "color": "#333333",
+      "content": "电机控制",
+      "fontSize": 24,
+      "borderWidth": 0,
+      "borderColor": "#cccccc",
+      "borderRadius": 0,
+      "backgroundColor": "#ffffff",
+      "mode": "Wrap",
+      "textAlign": "left",
+      "position": {
+        "x": 32,
+        "y": 24
+      }
+    },
+    {
+      "type": "button",
+      "id": "button_start01",
+      "name": "button_start01",
+      "visible": true,
+      "event": "toggler",
       "size": {
         "width": 88,
-        "height": 32
+        "height": 36
       },
-      "event": "toggler",
       "value": {
         "valueType": [
           "BOOL"
@@ -29,13 +52,13 @@
       "text": "启动",
       "backgroundColor": "#409eff",
       "fontColor": "#ffffff",
-      "fontSize": 12,
+      "fontSize": 14,
       "selectedBackgroundColor": "#409eff",
       "selectedFontColor": "#ffffff",
-      "selectedFontSize": 12,
+      "selectedFontSize": 14,
       "borderWidth": 0,
       "borderColor": "#409eff",
-      "borderRadius": 0,
+      "borderRadius": 4,
       "position": {
         "x": 40,
         "y": 100
@@ -43,14 +66,14 @@
     },
     {
       "type": "button",
-      "id": "button_stop01",
+      "id": "button_stop001",
+      "name": "button_stop001",
       "visible": true,
-      "name": "button_stop01",
+      "event": "toggler",
       "size": {
         "width": 88,
-        "height": 32
+        "height": 36
       },
-      "event": "toggler",
       "value": {
         "valueType": [
           "BOOL"
@@ -62,28 +85,28 @@
       "text": "停止",
       "backgroundColor": "#409eff",
       "fontColor": "#ffffff",
-      "fontSize": 12,
+      "fontSize": 14,
       "selectedBackgroundColor": "#409eff",
       "selectedFontColor": "#ffffff",
-      "selectedFontSize": 12,
+      "selectedFontSize": 14,
       "borderWidth": 0,
       "borderColor": "#409eff",
-      "borderRadius": 0,
+      "borderRadius": 4,
       "position": {
-        "x": 40,
-        "y": 148
+        "x": 144,
+        "y": 100
       }
     },
     {
       "type": "button",
-      "id": "button_reset",
+      "id": "button_reset01",
+      "name": "button_reset01",
       "visible": true,
-      "name": "button_reset",
+      "event": "toggler",
       "size": {
         "width": 88,
-        "height": 32
+        "height": 36
       },
-      "event": "toggler",
       "value": {
         "valueType": [
           "BOOL"
@@ -95,72 +118,71 @@
       "text": "复位",
       "backgroundColor": "#409eff",
       "fontColor": "#ffffff",
-      "fontSize": 12,
+      "fontSize": 14,
       "selectedBackgroundColor": "#409eff",
       "selectedFontColor": "#ffffff",
-      "selectedFontSize": 12,
+      "selectedFontSize": 14,
       "borderWidth": 0,
       "borderColor": "#409eff",
-      "borderRadius": 0,
+      "borderRadius": 4,
       "position": {
-        "x": 40,
-        "y": 196
+        "x": 248,
+        "y": 100
       }
     },
     {
       "type": "light",
-      "id": "light_run001",
-      "name": "light_run001",
+      "id": "light_run0001",
+      "name": "light_run0001",
       "visible": true,
       "value": {
         "valueType": [
           "BOOL"
         ],
         "variableType": "",
-        "variableName": "PLC.Motor.Run",
+        "variableName": "",
         "value": false
       },
       "size": {
-        "width": 100,
-        "height": 100
+        "width": 80,
+        "height": 80
       },
       "startColor": "#75593E",
       "backgroundImage": "Green",
       "position": {
-        "x": 220,
-        "y": 80
+        "x": 60,
+        "y": 220
       }
     },
     {
       "type": "light",
-      "id": "light_fault1",
-      "name": "light_fault1",
+      "id": "light_fault01",
+      "name": "light_fault01",
       "visible": true,
       "value": {
         "valueType": [
           "BOOL"
         ],
         "variableType": "",
-        "variableName": "PLC.Motor.Fault",
+        "variableName": "",
         "value": false
       },
       "size": {
-        "width": 100,
-        "height": 100
+        "width": 80,
+        "height": 80
       },
       "startColor": "#75593E",
       "backgroundImage": "Gray",
       "position": {
-        "x": 340,
-        "y": 80
+        "x": 180,
+        "y": 220
       }
     },
     {
-      "type": "meter180",
-      "id": "meter180rpm",
+      "type": "numberInput",
+      "id": "number_speed01",
+      "name": "number_speed01",
       "visible": true,
-      "radius": 143,
-      "name": "meter180rpm",
       "value": {
         "valueType": [
           "BYTE",
@@ -173,37 +195,57 @@
           "UINT",
           "DINT",
           "UDINT",
-          "LINT"
+          "LINT",
+          "REAL",
+          "LREAL"
         ],
         "variableType": "",
-        "variableName": "PLC.Motor.Speed",
+        "variableName": "",
+        "value": "1500"
+      },
+      "intLength": 4,
+      "decimalLength": 0,
+      "size": {
+        "width": 130,
+        "height": 34
+      },
+      "color": "#333333",
+      "fontSize": 14,
+      "fontColor": "#000000",
+      "backgroundColor": "#ffffff",
+      "selectedBackgroundColor": "#0000ff",
+      "selectedFontColor": "#ffffff",
+      "selectedFontSize": 14,
+      "position": {
+        "x": 55,
+        "y": 385
+      }
+    },
+    {
+      "type": "output",
+      "id": "output_speed01",
+      "name": "output_speed01",
+      "visible": true,
+      "size": {
+        "width": 130,
+        "height": 34
+      },
+      "backgroundColor": "#ffffff",
+      "fontColor": "#000000",
+      "borderColor": "#111111",
+      "borderWidth": 1,
+      "borderRadius": 5,
+      "fontSize": 14,
+      "textAlign": "right",
+      "value": {
+        "valueType": [],
+        "variableType": "",
+        "variableName": "",
         "value": 1450
       },
-      "size": {
-        "width": 252,
-        "height": 139,
-        "r": 10
-      },
-      "axisLine.lineStyle.color": [
-        [
-          0.3,
-          "#67e0e3"
-        ],
-        [
-          0.7,
-          "#37a2da"
-        ],
-        [
-          1,
-          "#fd666d"
-        ]
-      ],
-      "startValue": 0,
-      "endValue": 3000,
-      "splitNumber": 5,
       "position": {
-        "x": 510,
-        "y": 210
+        "x": 220,
+        "y": 385
       }
     }
   ]
