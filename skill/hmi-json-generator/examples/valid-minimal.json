@@ -18,7 +18,7 @@
         "height": 24
       },
       "color": "#333333",
-      "content": "输送线控制",
+      "content": "原生组件示例",
       "fontSize": 18,
       "borderWidth": 0,
       "borderColor": "#cccccc",
@@ -30,70 +30,6 @@
         "x": 32,
         "y": 24
       }
-    },
-    {
-      "type": "base:rect",
-      "id": "base:rect_belt01",
-      "name": "base:rect_belt01",
-      "visible": true,
-      "size": {
-        "width": 560,
-        "height": 80
-      },
-      "backgroundColor": "#7a8793",
-      "position": {
-        "x": 120,
-        "y": 260
-      }
-    },
-    {
-      "type": "base:polyline",
-      "id": "base:polyline_flow01",
-      "name": "base:polyline_flow01",
-      "visible": true,
-      "backgroundColor": "#ffffff",
-      "strokeColor": "#ffffff",
-      "strokeWidth": 4,
-      "isDashed": true,
-      "dashLength": 14,
-      "dashGap": 10,
-      "dashGapColor": "#7a8793",
-      "isDashFlowing": true,
-      "dashFlowDirection": "forward",
-      "dashFlowDistance": 20,
-      "isImageFlowing": false,
-      "flowDirection": "forward",
-      "flowImage": "./img/radioCkecked.png",
-      "flowImageSize": 12,
-      "flowImageCount": 1,
-      "flowImageDistance": 30,
-      "flowImageDuration": 3,
-      "position": {
-        "x": 130,
-        "y": 300
-      },
-      "size": {
-        "width": 540,
-        "height": 1
-      },
-      "pointsSize": {
-        "width": 540,
-        "height": 1
-      },
-      "segments": [
-        1,
-        2
-      ],
-      "points": [
-        {
-          "x": 0,
-          "y": 0
-        },
-        {
-          "x": 540,
-          "y": 0
-        }
-      ]
     },
     {
       "type": "button",
@@ -124,9 +60,13 @@
       "borderColor": "#409eff",
       "borderRadius": 0,
       "position": {
-        "x": 40,
-        "y": 100
+        "x": 32,
+        "y": 72
       }
     }
-  ]
+  ],
+  "htmlCode": {
+    "codeHeadValue": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<title>HTML 示例</title>\n<style>body{margin:0;font-family:Arial,\"Microsoft YaHei\",sans-serif}.html-demo{margin:140px 32px;padding:16px;border:1px solid #d9e2ec;border-radius:8px;color:#334155}.html-demo button{margin-top:10px}</style>\n</head>",
+    "codeBodyValue": "<body>\n<div class=\"html-demo\"><div id=\"message\">HTML / CSS / JavaScript 示例</div><button onclick=\"document.getElementById('message').innerText='按钮已点击'\">测试脚本</button></div>\n<script>document.getElementById(\"message\").dataset.ready=\"true\";</script>\n</body>\n</html>"
+  }
 }
