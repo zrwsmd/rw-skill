@@ -18,7 +18,7 @@
         "height": 24
       },
       "color": "#333333",
-      "content": "原生组件示例",
+      "content": "输送线控制",
       "fontSize": 18,
       "borderWidth": 0,
       "borderColor": "#cccccc",
@@ -32,6 +32,144 @@
       }
     },
     {
+      "type": "base:rect",
+      "id": "base:rect_belt01",
+      "name": "base:rect_belt01",
+      "visible": true,
+      "size": {
+        "width": 360,
+        "height": 60
+      },
+      "backgroundColor": "#7a8793",
+      "position": {
+        "x": 32,
+        "y": 180
+      }
+    },
+    {
+      "type": "base:circle",
+      "id": "base:circle_roller_left01",
+      "name": "base:circle_roller_left01",
+      "visible": true,
+      "size": {
+        "width": 60,
+        "height": 60,
+        "r": 30
+      },
+      "backgroundColor": "#59636d",
+      "position": {
+        "x": 12,
+        "y": 180
+      }
+    },
+    {
+      "type": "base:circle",
+      "id": "base:circle_roller_right01",
+      "name": "base:circle_roller_right01",
+      "visible": true,
+      "size": {
+        "width": 60,
+        "height": 60,
+        "r": 30
+      },
+      "backgroundColor": "#59636d",
+      "position": {
+        "x": 332,
+        "y": 180
+      }
+    },
+    {
+      "type": "base:polyline",
+      "id": "base:polyline_flow01",
+      "name": "base:polyline_flow01",
+      "visible": true,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#ffffff",
+      "strokeWidth": 4,
+      "isDashed": true,
+      "dashLength": 14,
+      "dashGap": 10,
+      "dashGapColor": "#7a8793",
+      "isDashFlowing": true,
+      "dashFlowDirection": "forward",
+      "dashFlowDistance": 20,
+      "isImageFlowing": false,
+      "flowDirection": "forward",
+      "flowImage": "./img/radioCkecked.png",
+      "flowImageSize": 12,
+      "flowImageCount": 1,
+      "flowImageDistance": 30,
+      "flowImageDuration": 3,
+      "position": {
+        "x": 42,
+        "y": 210
+      },
+      "size": {
+        "width": 340,
+        "height": 1
+      },
+      "pointsSize": {
+        "width": 340,
+        "height": 1
+      },
+      "segments": [1, 2],
+      "points": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 340,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "type": "light",
+      "id": "light_running01",
+      "name": "light_running01",
+      "visible": true,
+      "size": {
+        "width": 36,
+        "height": 36
+      },
+      "value": {
+        "valueType": ["BOOL"],
+        "variableType": "",
+        "variableName": "",
+        "value": true
+      },
+      "startColor": "#75593E",
+      "backgroundImage": "Green",
+      "position": {
+        "x": 32,
+        "y": 275
+      }
+    },
+    {
+      "type": "text",
+      "id": "text_running_label01",
+      "name": "text_running_label01",
+      "visible": true,
+      "size": {
+        "width": 100,
+        "height": 24
+      },
+      "color": "#333333",
+      "content": "运行状态",
+      "fontSize": 14,
+      "borderWidth": 0,
+      "borderColor": "#ffffff",
+      "borderRadius": 0,
+      "backgroundColor": "#ffffff",
+      "mode": "Wrap",
+      "textAlign": "left",
+      "position": {
+        "x": 76,
+        "y": 281
+      }
+    },
+    {
       "type": "button",
       "id": "button_start01",
       "name": "button_start01",
@@ -42,9 +180,7 @@
         "height": 32
       },
       "value": {
-        "valueType": [
-          "BOOL"
-        ],
+        "valueType": ["BOOL"],
         "variableType": "",
         "variableName": "",
         "value": false
@@ -61,12 +197,109 @@
       "borderRadius": 0,
       "position": {
         "x": 32,
-        "y": 72
+        "y": 330
+      }
+    },
+    {
+      "type": "button",
+      "id": "button_stop01",
+      "name": "button_stop01",
+      "visible": true,
+      "event": "toggler",
+      "size": {
+        "width": 88,
+        "height": 32
+      },
+      "value": {
+        "valueType": ["BOOL"],
+        "variableType": "",
+        "variableName": "",
+        "value": false
+      },
+      "text": "停止",
+      "backgroundColor": "#f56c6c",
+      "fontColor": "#ffffff",
+      "fontSize": 12,
+      "selectedBackgroundColor": "#f56c6c",
+      "selectedFontColor": "#ffffff",
+      "selectedFontSize": 12,
+      "borderWidth": 0,
+      "borderColor": "#f56c6c",
+      "borderRadius": 0,
+      "position": {
+        "x": 132,
+        "y": 330
+      }
+    },
+    {
+      "type": "numberInput",
+      "id": "numberInput_speed01",
+      "name": "numberInput_speed01",
+      "visible": true,
+      "size": {
+        "width": 120,
+        "height": 32
+      },
+      "value": {
+        "valueType": [
+          "BYTE",
+          "WORD",
+          "DWORD",
+          "LWORD",
+          "SINT",
+          "USINT",
+          "INT",
+          "UINT",
+          "DINT",
+          "UDINT",
+          "LINT",
+          "REAL",
+          "LREAL"
+        ],
+        "variableType": "",
+        "variableName": "",
+        "value": "60"
+      },
+      "intLength": 3,
+      "decimalLength": 0,
+      "color": "#333333",
+      "fontSize": 14,
+      "fontColor": "#333333",
+      "backgroundColor": "#ffffff",
+      "selectedBackgroundColor": "#ffffff",
+      "selectedFontColor": "#333333",
+      "selectedFontSize": 14,
+      "position": {
+        "x": 32,
+        "y": 390
+      }
+    },
+    {
+      "type": "text",
+      "id": "text_speed_label01",
+      "name": "text_speed_label01",
+      "visible": true,
+      "size": {
+        "width": 180,
+        "height": 24
+      },
+      "color": "#333333",
+      "content": "输送速度设定",
+      "fontSize": 14,
+      "borderWidth": 0,
+      "borderColor": "#ffffff",
+      "borderRadius": 0,
+      "backgroundColor": "#ffffff",
+      "mode": "Wrap",
+      "textAlign": "left",
+      "position": {
+        "x": 160,
+        "y": 394
       }
     }
   ],
   "htmlCode": {
-    "codeHeadValue": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<title>HTML 示例</title>\n<style>body{margin:0;font-family:Arial,\"Microsoft YaHei\",sans-serif}.html-demo{margin:140px 32px;padding:16px;border:1px solid #d9e2ec;border-radius:8px;color:#334155}.html-demo button{margin-top:10px}</style>\n</head>",
-    "codeBodyValue": "<body>\n<div class=\"html-demo\"><div id=\"message\">HTML / CSS / JavaScript 示例</div><button onclick=\"document.getElementById('message').innerText='按钮已点击'\">测试脚本</button></div>\n<script>document.getElementById(\"message\").dataset.ready=\"true\";</script>\n</body>\n</html>"
+    "codeHeadValue": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<title>第三方数据展示区</title>\n<style>\n  body {\n    margin: 0;\n    font-family: Arial, \"Microsoft YaHei\", sans-serif;\n    background: transparent;\n  }\n\n  .external-data-panel {\n    position: absolute;\n    left: 440px;\n    top: 24px;\n    width: 330px;\n    min-height: 500px;\n    padding: 18px;\n    box-sizing: border-box;\n    border: 1px solid #d9e2ec;\n    border-radius: 8px;\n    background: #f8fafc;\n    color: #334155;\n  }\n\n  .external-data-panel h2 {\n    margin: 0 0 14px;\n    font-size: 18px;\n  }\n\n  .card {\n    margin-top: 12px;\n    padding: 12px;\n    border-radius: 6px;\n    background: #ffffff;\n    border: 1px solid #e2e8f0;\n  }\n\n  .card-title {\n    color: #64748b;\n    font-size: 13px;\n  }\n\n  .card-value {\n    margin-top: 6px;\n    color: #1e293b;\n    font-size: 22px;\n    font-weight: 700;\n  }\n\n  .tag {\n    display: inline-block;\n    margin-top: 14px;\n    padding: 5px 8px;\n    border-radius: 4px;\n    background: #e0f2fe;\n    color: #0369a1;\n    font-size: 12px;\n  }\n</style>\n</head>",
+    "codeBodyValue": "<body>\n  <section class=\"external-data-panel\">\n    <h2>第三方数据展示区</h2>\n    <div class=\"card\">\n      <div class=\"card-title\">MES 计划完成率</div>\n      <div id=\"plan-rate\" class=\"card-value\">--</div>\n    </div>\n    <div class=\"card\">\n      <div class=\"card-title\">摄像头连接状态</div>\n      <div id=\"camera-status\" class=\"card-value\">接口待配置</div>\n    </div>\n    <div class=\"card\">\n      <div class=\"card-title\">外部 API 数据</div>\n      <div id=\"api-status\" class=\"card-value\">模拟预览</div>\n    </div>\n    <span class=\"tag\">不读取、不写入、不同步现场 PLC 变量</span>\n  </section>\n\n  <script>\n    document.getElementById('plan-rate').innerText = '模拟数据';\n  </script>\n</body>\n</html>"
   }
 }

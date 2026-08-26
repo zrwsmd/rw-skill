@@ -1,26 +1,36 @@
 # hmi-json-generator
 
-完整 HMI JSON 生成 Skill 包。
+用于生成符合严格 HMI JSON 协议的 Skill 包，支持原生 HMI 组件、可选 HTML 页面，以及原生组件与 HTML 同页混合展示。
 
-## 文件
+## 文件说明
 
-- `SKILL.md`：生成流程、原生组件、HTML 页面、变量、动态和输出校验规则。
-- `references/schema.md`：唯一权威 HMI JSON Schema，包含 `graph.htmlCode`。
-- `references/component-schema.json`：机器可读根字段、HTML 支持、嵌套、绑定、资源和路径约束。
-- `references/layout-style.md`：原生组件、动态元素和 HTML 页面布局规则。
-- `examples/valid-minimal.json`：最小可渲染示例。
+- `SKILL.md`：生成流程、需求解析、组件选型、变量使用、动态效果和输出校验规则。
+- `references/schema.md`：唯一权威 HMI JSON Schema；定义根节点、字段白名单、组件类型、嵌套、绑定、路径、资源与 HTML 协议。
+- `references/component-schema.json`：供程序读取的机器可读约束，包括根字段、组件字段、嵌套、绑定、资源和路径规则。
+- `references/layout-style.md`：画布边界、组件对齐、避让、合法工艺重叠、HTML 页面及混合页面布局规则。
+- `examples/valid-minimal.json`：可渲染的最小示例。
 
-## HTML 支持
+## 使用原则
 
-根节点可选字段：
+1. 先阅读 `SKILL.md`，根据需求选择原生组件、HTML 或混合页面实现。
+2. 所有输出 JSON 必须以 `references/schema.md` 为最终依据。
+3. 字段白名单、组件类型、层级关系、变量绑定、路径约束和资源名必须符合 `references/component-schema.json`。
+4. 组件位置、边界、文字可读性、重叠和混合页面分区必须符合 `references/layout-style.md`。
+5. 可参考 `examples/valid-minimal.json` 验证 JSON 的基本结构与渲染方式。
 
-```json
-"htmlCode": {
-  "codeHeadValue": "...",
-  "codeBodyValue": "..."
-}
-```
+## HTML 与混合页面
 
-渲染器已验证支持常见 HTML 页面结构、常见标签与属性、完整 `<!DOCTYPE html>/<html>/<head>/<body>` 结构、CSS、内联 JavaScript、`<script src="...">` 外部脚本、DOM 交互、定时器和 iframe。
+根节点可选使用 `graph.htmlCode` 承载 HTML 内容。HTML 字段结构、字符串转义、支持能力、iframe 使用条件，以及 HTML 与 PLC/原生变量之间的数据边界，均以 `references/schema.md` 为准。
 
-HTML 按正常网页开发方式生成：样式通常放在 `<head>` 中，页面内容和脚本通常放在 `<body>` 中。标准 HMI 控制、变量绑定、原生趋势图、仪表、按钮、输入和管线流动优先使用原生组件；复杂展示、动画和网页化交互可使用 HTML/CSS/JavaScript 或外部库。
+现场 PLC 控制、变量绑定、参数设定、报警确认、原生趋势图、仪表和工艺动画优先使用原生组件。复杂展示、复杂报表、第三方 API、摄像头、外部系统、iframe 和网页化交互可使用 HTML；两者需要同屏时可使用混合页面布局。
+
+## 权威性顺序
+
+当文件内容存在冲突时，按以下顺序处理：
+
+1. 用户明确需求。
+2. `references/schema.md` 的字段、类型、层级和数据结构约束。
+3. `references/component-schema.json` 的机器可读约束。
+4. `references/layout-style.md` 的布局规则。
+5. `SKILL.md` 的生成流程与策略。
+6. `examples/valid-minimal.json` 的参考实现。
