@@ -153,6 +153,10 @@ segments[0] === 1
 segments[1..] 全部为 2
 ```
 
+`points` 元素为对象 `{"x": 数字, "y": 数字}`（相对组件 position 的局部坐标），**不是** `[x, y]` 数组对；水平/垂直线取 `"height": 1`（或 `"width": 1`）避免零尺寸。（实测：数组对写法渲染器不识别。）
+
+流动动画最小字段集（实测可动）：`isDashed: true` + `isDashFlowing: true` + `dashFlowDirection`；**省略 `isDashed` 时流动不生效**。`dashLength/dashGap/dashGapColor/dashFlowDistance` 及 `isImageFlowing` 全家桶均为可选装饰字段，不写也能动；实测 `dashFlowDistance` 不同取值无速度差异（渲染器疑似未实现调速）。
+
 方向枚举仅允许：
 
 ```json
