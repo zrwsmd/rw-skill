@@ -15,6 +15,47 @@
     "id": "graph",
     "name": "screen"
   },
+  "layoutPolicy": {
+    "rootSizeWhenUserUnspecified": {
+      "width": 800,
+      "height": 600
+    },
+    "hostViewportSafeArea": {
+      "insetRatio": 0.06,
+      "minimumInsetX": 32,
+      "minimumInsetY": 32,
+      "criticalContentMustStayInside": true,
+      "criticalContentTypes": [
+        "text",
+        "output",
+        "input",
+        "numberInput",
+        "textarea",
+        "select",
+        "button",
+        "checkbox",
+        "switch",
+        "light",
+        "progress",
+        "arc",
+        "arcSlider",
+        "meter180",
+        "meter360",
+        "barDisplay",
+        "trace",
+        "xyChart",
+        "table"
+      ]
+    },
+    "viewportUnknownFallback": "default-root-size-and-safe-area",
+    "jsonBoundsDoNotProveHostVisibility": true,
+    "forbiddenCropFixes": [
+      "infer-root-size-from-monitor-or-screenshot",
+      "enlarge-root-canvas-without-user-size",
+      "uniformly-scale-all-existing-nodes",
+      "infer-graph-coordinates-from-screenshot-with-unknown-transform"
+    ]
+  },
   "htmlCode": {
     "optional": true,
     "allowedFields": ["codeHeadValue", "codeBodyValue"],
