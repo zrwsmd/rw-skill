@@ -16,7 +16,20 @@
     "name": "screen"
   },
   "layoutPolicy": {
-    "rootSizeWhenUserUnspecified": "infer-from-content-box-and-symmetric-safe-area",
+    "rootSizeWhenUserUnspecified": {
+      "default": {
+        "width": 800,
+        "height": 600
+      },
+      "mode": "start-from-default-then-adjust-when-content-requires",
+      "defaultAspectRatio": "4:3",
+      "preferredAspectRatios": ["4:3", "16:9"],
+      "preferReflowBeforeResize": true,
+      "preserveSelectedAspectRatioWhenResizing": true,
+      "forbidExtremeAspectRatioUnlessUserSpecified": true,
+      "recenterAndRevalidateAfterResize": true,
+      "userSpecifiedSizeOrAspectRatioTakesPrecedence": true
+    },
     "rendererTransform": {
       "defaultZoom": 1,
       "zoomIsUniform": true,
@@ -55,7 +68,7 @@
       "equalHorizontalInsets": true,
       "equalVerticalInsets": true
     },
-    "viewportUnknownFallback": "content-fit-and-center",
+    "viewportUnknownFallback": "default-800x600-then-content-fit-and-center",
     "jsonBoundsDoNotProveHostVisibility": true,
     "forbiddenCropFixes": [
       "infer-root-size-from-monitor-or-screenshot",
