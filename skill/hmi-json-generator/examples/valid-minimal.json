@@ -37,13 +37,13 @@
       "name": "base:rect_belt01",
       "visible": true,
       "size": {
-        "width": 360,
-        "height": 60
+        "width": 656,
+        "height": 80
       },
       "backgroundColor": "#7a8793",
       "position": {
-        "x": 32,
-        "y": 180
+        "x": 72,
+        "y": 150
       }
     },
     {
@@ -52,14 +52,14 @@
       "name": "base:circle_roller_left01",
       "visible": true,
       "size": {
-        "width": 60,
-        "height": 60,
-        "r": 30
+        "width": 80,
+        "height": 80,
+        "r": 40
       },
       "backgroundColor": "#59636d",
       "position": {
-        "x": 12,
-        "y": 180
+        "x": 32,
+        "y": 150
       }
     },
     {
@@ -68,14 +68,14 @@
       "name": "base:circle_roller_right01",
       "visible": true,
       "size": {
-        "width": 60,
-        "height": 60,
-        "r": 30
+        "width": 80,
+        "height": 80,
+        "r": 40
       },
       "backgroundColor": "#59636d",
       "position": {
-        "x": 332,
-        "y": 180
+        "x": 688,
+        "y": 150
       }
     },
     {
@@ -101,15 +101,15 @@
       "flowImageDistance": 30,
       "flowImageDuration": 3,
       "position": {
-        "x": 42,
-        "y": 210
+        "x": 52,
+        "y": 190
       },
       "size": {
-        "width": 340,
+        "width": 696,
         "height": 1
       },
       "pointsSize": {
-        "width": 340,
+        "width": 696,
         "height": 1
       },
       "segments": [1, 2],
@@ -119,7 +119,7 @@
           "y": 0
         },
         {
-          "x": 340,
+          "x": 696,
           "y": 0
         }
       ]
@@ -299,7 +299,7 @@
     }
   ],
   "htmlCode": {
-    "codeHeadValue": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<title>第三方数据展示区</title>\n<style>\n  body {\n    margin: 0;\n    font-family: Arial, \"Microsoft YaHei\", sans-serif;\n    background: transparent;\n  }\n\n  .external-data-panel {\n    position: absolute;\n    left: 440px;\n    top: 24px;\n    width: 330px;\n    min-height: 500px;\n    padding: 18px;\n    box-sizing: border-box;\n    border: 1px solid #d9e2ec;\n    border-radius: 8px;\n    background: #f8fafc;\n    color: #334155;\n  }\n\n  .external-data-panel h2 {\n    margin: 0 0 14px;\n    font-size: 18px;\n  }\n\n  .card {\n    margin-top: 12px;\n    padding: 12px;\n    border-radius: 6px;\n    background: #ffffff;\n    border: 1px solid #e2e8f0;\n  }\n\n  .card-title {\n    color: #64748b;\n    font-size: 13px;\n  }\n\n  .card-value {\n    margin-top: 6px;\n    color: #1e293b;\n    font-size: 22px;\n    font-weight: 700;\n  }\n\n  .tag {\n    display: inline-block;\n    margin-top: 14px;\n    padding: 5px 8px;\n    border-radius: 4px;\n    background: #e0f2fe;\n    color: #0369a1;\n    font-size: 12px;\n  }\n</style>\n</head>",
-    "codeBodyValue": "<body>\n  <section class=\"external-data-panel\">\n    <h2>第三方数据展示区</h2>\n    <div class=\"card\">\n      <div class=\"card-title\">MES 计划完成率</div>\n      <div id=\"plan-rate\" class=\"card-value\">--</div>\n    </div>\n    <div class=\"card\">\n      <div class=\"card-title\">摄像头连接状态</div>\n      <div id=\"camera-status\" class=\"card-value\">接口待配置</div>\n    </div>\n    <div class=\"card\">\n      <div class=\"card-title\">外部 API 数据</div>\n      <div id=\"api-status\" class=\"card-value\">模拟预览</div>\n    </div>\n    <span class=\"tag\">不读取、不写入、不同步现场 PLC 变量</span>\n  </section>\n\n  <script>\n    document.getElementById('plan-rate').innerText = '模拟数据';\n  </script>\n</body>\n</html>"
+    "codeHeadValue": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>第三方数据展示区</title>\n<style>\n  * {\n    box-sizing: border-box;\n  }\n\n  body {\n    margin: 0;\n    min-height: 100vh;\n    padding: 24px;\n    font-family: Arial, \"Microsoft YaHei\", sans-serif;\n    background: #f1f5f9;\n    color: #334155;\n  }\n\n  .external-data-panel {\n    width: 100%;\n    min-height: calc(100vh - 48px);\n    padding: 24px;\n    border: 1px solid #d9e2ec;\n    border-radius: 8px;\n    background: #f8fafc;\n  }\n\n  .external-data-panel h2 {\n    margin: 0 0 18px;\n    font-size: 22px;\n  }\n\n  .card-grid {\n    display: grid;\n    grid-template-columns: repeat(3, minmax(0, 1fr));\n    gap: 16px;\n  }\n\n  .card {\n    min-height: 140px;\n    padding: 18px;\n    border-radius: 6px;\n    background: #ffffff;\n    border: 1px solid #e2e8f0;\n  }\n\n  .card-title {\n    color: #64748b;\n    font-size: 13px;\n  }\n\n  .card-value {\n    margin-top: 12px;\n    color: #1e293b;\n    font-size: 22px;\n    font-weight: 700;\n  }\n\n  .tag {\n    display: inline-block;\n    margin-top: 18px;\n    padding: 5px 8px;\n    border-radius: 4px;\n    background: #e0f2fe;\n    color: #0369a1;\n    font-size: 12px;\n  }\n\n  @media (max-width: 700px) {\n    .card-grid {\n      grid-template-columns: 1fr;\n    }\n  }\n</style>\n</head>",
+    "codeBodyValue": "<body>\n  <main class=\"external-data-panel\">\n    <h2>第三方数据展示区</h2>\n    <section class=\"card-grid\">\n      <div class=\"card\">\n        <div class=\"card-title\">MES 计划完成率</div>\n        <div id=\"plan-rate\" class=\"card-value\">--</div>\n      </div>\n      <div class=\"card\">\n        <div class=\"card-title\">摄像头连接状态</div>\n        <div id=\"camera-status\" class=\"card-value\">接口待配置</div>\n      </div>\n      <div class=\"card\">\n        <div class=\"card-title\">外部 API 数据</div>\n        <div id=\"api-status\" class=\"card-value\">模拟预览</div>\n      </div>\n    </section>\n    <span class=\"tag\">不读取、不写入、不同步现场 PLC 变量</span>\n  </main>\n\n  <script>\n    document.getElementById('plan-rate').innerText = '模拟数据';\n  </script>\n</body>\n</html>"
   }
 }

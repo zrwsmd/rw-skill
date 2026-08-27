@@ -1,13 +1,13 @@
 # hmi-json-generator
 
-用于生成符合严格 HMI JSON 协议的 Skill 包，支持原生 HMI 组件、可选 HTML 页面，以及原生组件与 HTML 同页混合展示。
+用于生成符合严格 HMI JSON 协议的 Skill 包，支持原生 HMI 组件、可选 HTML 页面，以及在同一个 `graph` JSON 中并列保存、分别独立渲染的原生组件层与 HTML 层。
 
 ## 文件说明
 
 - `SKILL.md`：生成流程、需求解析、组件选型、变量使用、动态效果和输出校验规则。
 - `references/schema.md`：唯一权威 HMI JSON Schema；定义根节点、字段白名单、组件类型、嵌套、绑定、路径、资源与 HTML 协议。
 - `references/component-schema.json`：供程序读取的机器可读约束，包括根字段、组件字段、嵌套、绑定、资源和路径规则。
-- `references/layout-style.md`：画布边界、组件对齐、避让、合法工艺重叠、HTML 页面及混合页面布局规则。
+- `references/layout-style.md`：各渲染层自身的画布边界、组件对齐、合法工艺重叠和布局规则，以及禁止跨层空间协调的约束。
 - `examples/valid-minimal.json`：可渲染的最小示例。
 
 ## 使用原则
@@ -15,7 +15,7 @@
 1. 先阅读 `SKILL.md`，根据需求选择原生组件、HTML 或混合页面实现。
 2. 所有输出 JSON 必须以 `references/schema.md` 为最终依据。
 3. 字段白名单、组件类型、层级关系、变量绑定、路径约束和资源名必须符合 `references/component-schema.json`。
-4. 组件位置、边界、文字可读性、重叠和混合页面分区必须符合 `references/layout-style.md`。
+4. 原生组件层与 HTML 层必须分别在假设另一层不存在的前提下生成；各层内部的位置、边界、文字可读性和重叠必须符合 `references/layout-style.md`，不得进行跨层分区或避让。
 5. 可参考 `examples/valid-minimal.json` 验证 JSON 的基本结构与渲染方式。
 
 ## HTML 与混合页面
