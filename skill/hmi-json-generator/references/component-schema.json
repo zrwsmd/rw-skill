@@ -16,14 +16,20 @@
     "name": "screen"
   },
   "layoutPolicy": {
-    "rootSizeWhenUserUnspecified": {
-      "width": 800,
-      "height": 600
+    "rootSizeWhenUserUnspecified": "infer-from-content-box-and-symmetric-safe-area",
+    "rendererTransform": {
+      "defaultZoom": 1,
+      "zoomIsUniform": true,
+      "positionsAndSizesAreZoomIndependent": true
     },
-    "hostViewportSafeArea": {
-      "insetRatio": 0.06,
-      "minimumInsetX": 32,
-      "minimumInsetY": 32,
+    "contentBox": {
+      "centerInCanvas": true,
+      "symmetricSafeArea": true,
+      "safeInsetRatio": 0.04,
+      "minimumInsetX": 24,
+      "minimumInsetY": 24,
+      "roundingTolerance": 1,
+      "excludeFullCanvasBackground": true,
       "criticalContentMustStayInside": true,
       "criticalContentTypes": [
         "text",
@@ -45,14 +51,18 @@
         "trace",
         "xyChart",
         "table"
-      ]
+      ],
+      "equalHorizontalInsets": true,
+      "equalVerticalInsets": true
     },
-    "viewportUnknownFallback": "default-root-size-and-safe-area",
+    "viewportUnknownFallback": "content-fit-and-center",
     "jsonBoundsDoNotProveHostVisibility": true,
     "forbiddenCropFixes": [
       "infer-root-size-from-monitor-or-screenshot",
-      "enlarge-root-canvas-without-user-size",
+      "change-root-size-without-recomputing-layout-and-center",
       "uniformly-scale-all-existing-nodes",
+      "single-edge-translate-as-crop-fix",
+      "encode-screen-zoom-in-node-coordinates",
       "infer-graph-coordinates-from-screenshot-with-unknown-transform"
     ]
   },
