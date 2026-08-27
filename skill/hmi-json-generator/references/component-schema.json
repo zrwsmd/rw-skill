@@ -1,5 +1,5 @@
 {
-  "schemaName": "hmi-json-generator-strict-html-mixed",
+  "schemaName": "hmi-json-generator-strict-html-mixed-independent-layers",
   "rootAllowed": [
     "type",
     "id",
@@ -9,6 +9,12 @@
     "children",
     "htmlCode"
   ],
+  "rootRequired": ["type", "id", "name", "size", "backgroundColor", "children"],
+  "rootFixedValues": {
+    "type": "graph",
+    "id": "graph",
+    "name": "screen"
+  },
   "htmlCode": {
     "optional": true,
     "allowedFields": ["codeHeadValue", "codeBodyValue"],
@@ -19,12 +25,29 @@
     "supportsExternalScriptSrc": true,
     "supportsIframe": true,
     "supportsNativeChildrenAndHtmlCodeTogether": true,
+    "renderLayer": "html",
+    "independentRenderLayers": true,
+    "sharesNativeCoordinateSystem": false,
+    "requiresCrossLayerCollisionCheck": false,
+    "requiresCrossLayerOcclusionCheck": false,
+    "requiresCrossLayerClickConflictCheck": false,
+    "requiresCrossLayerScrollConflictCheck": false,
+    "requiresFixedMixedLayoutPartition": false,
     "supportsPlcVariableBinding": false,
     "supportsNativeComponentVariableAccess": false,
     "supportsPlcVariableRead": false,
     "supportsPlcVariableWrite": false,
     "supportsThirdPartyApiIntegration": true,
     "thirdPartyApiRequiresUserConfiguration": true
+  },
+  "nativeChildren": {
+    "renderLayer": "native",
+    "independentRenderLayers": true,
+    "sharesHtmlCoordinateSystem": false,
+    "requiresCrossLayerCollisionCheck": false,
+    "requiresCrossLayerOcclusionCheck": false,
+    "requiresCrossLayerClickConflictCheck": false,
+    "requiresCrossLayerScrollConflictCheck": false
   },
   "forbiddenAnywhere": [
     "w",
@@ -544,9 +567,9 @@
     "node:tab": ["type", "id", "name", "titleText", "visible", "children"]
   },
   "nesting": {
-    "graphChildren": "all types except node:tab",
+    "graphChildren": "all registered native types except node:tab",
     "tabViewChildren": ["node:tab"],
-    "tabChildren": "all types except node:tab",
+    "tabChildren": "all registered native types except node:tab",
     "containerChildrenForbidden": true
   },
   "pathConstraints": {

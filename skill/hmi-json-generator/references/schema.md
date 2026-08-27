@@ -106,6 +106,17 @@ graph.children 与 graph.htmlCode 可以在同一页面共同渲染。
 - HTML 负责复杂展示、复杂报表、筛选表格、时间轴、SVG/Canvas 图形、复杂动画、摄像头、iframe、第三方 API、外部系统和网页化交互。
 - 原生组件与 HTML 可以共同组成一个 HMI 页面。
 
+混合页面渲染层规则：
+
+- `graph.children` 是原生组件渲染层，`graph.htmlCode` 是 HTML 页面渲染层。
+- 两层属于独立渲染层，可以同时使用同一页面的完整可用空间。
+- 两层不共享原生组件坐标系统。
+- 不执行原生组件层与 HTML 页面层之间的坐标避让、包围盒碰撞、视觉遮挡、点击冲突或滚动冲突校验。
+- 不得仅因两层共同存在，就强制或默认采用左右、上下、侧边、页签或其他固定空间分区。
+- 原生组件仅在原生组件层内进行边界、重叠、文字可读性和交互可用性检查。
+- HTML 内容仅在 HTML 页面层内进行页面边界、内部重叠、文字可读性和交互可用性检查。
+- 独立渲染层不代表数据互通；HTML 与原生组件之间的数据边界仍以本节“HTML 数据边界”为准。
+
 ### HTML 数据边界
 
 当前 HTML 不支持：
@@ -252,6 +263,7 @@ node:tab.children → 常规组件
 - `node:tabView.children` 只能包含 `node:tab`。
 - `node:tab.children` 可包含常规组件。
 - `node:tab` 不可再嵌套 `node:tab`。
+- `graph.children` 与 `graph.htmlCode` 是根节点的并列字段，不构成父子包含、原生 z-index 叠放、跨层坐标避让或变量访问关系。
 
 ## 6. 类型字段白名单
 
@@ -409,7 +421,7 @@ points
 points.length === segments.length
 size.width === pointsSize.width
 size.height === pointsSize.height
-segments === 1
+segments[0] === 1
 segments[1..] 全部为 2
 ```
 
@@ -534,6 +546,6 @@ node:tabView.currentItem 必须在 tab 索引范围内
 9. 所有未确认 PLC 变量名和变量类型为空字符串。
 10. HTML 未读取、订阅、写入、同步或伪造现场 PLC/原生组件变量。
 11. 第三方 API、摄像头、外部系统未提供接口配置时，HTML 只使用占位、模拟数据或设计预览。
-12. 原生组件与 HTML 混合页面中，HTML 未遮挡原生 PLC 控制、报警确认、关键读数、关键输入或工艺操作区。
-13. 所有 ID 唯一、组件可见、坐标/尺寸合法且不越出画布。
+12. 原生组件层与 HTML 页面层分别进行自身的边界、可读性、可操作性和内部重叠检查；不执行跨层坐标避让、包围盒碰撞、遮挡、点击或滚动冲突检查。
+13. 所有 ID 唯一；原生组件在原生组件层内坐标/尺寸合法且不越出画布，HTML 内容在 HTML 页面层内适配可见范围。
 14. 输出是可解析 JSON，且不夹杂解释性文字。
