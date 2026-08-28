@@ -303,7 +303,43 @@ node:tab.children → 常规组件
 | `arc` | `value`（对象）、`startValue`、`endValue`、`backgroundColor`、`selectedBackgroundColor`、`color`、`fontSize`、`fontColor`、`rotateAngle`、`startAngle`、`endAngle`、`strokeWidth`、`isShowText` |
 | `arcSlider` | `value`（对象）、`startValue`、`endValue`、`backgroundColor`、`selectedBackgroundColor`、`fontSize`、`fontColor`、`rotateAngle`、`startAngle`、`endAngle`、`strokeWidth`、`isShowText`、`sliderColor`、`sliderSize` |
 | `potentiometer360` | `value`（对象）、`backgroundImage`、`splitNumber`、`startValue`、`endValue`、`pointerIcon` |
-| `meter180`、`meter360` | `radius`、`value`（对象）、`startValue`、`endValue`、`splitNumber`、`startAngle`、`endAngle`、`axisLine.lineStyle.color`、`splitLine.show`、`splitLine.length`、`splitLine.lineStyle.color`、`splitLine.lineStyle.width`、`axisTick.show`、`axisTick.length`、`axisTick.splitNumber`、`axisTick.lineStyle.color`、`axisTick.lineStyle.width`、`axisLabel.show`、`axisLabel.distance`、`axisLabel.rotate`、`axisLabel.color`、`axisLabel.fontSize`、`axisLabel.formatter`、`detail.show`、`detail.color`、`detail.fontSize`、`detail.offsetCenterX`、`detail.offsetCenterY`、`detail.formatter`、`pointer.show`、`pointer.length`、`pointer.width`、`pointer.itemStyle.color`、`pointer.itemStyle.color.auto`、`axisLine.show`、`axisLine.lineStyle.width` |
+| `meter180`、`meter360` | `radius`、`value`（对象）、`startValue`、`endValue`、`splitNumber`、`startAngle`、`endAngle`、`axisLine.lineStyle.color`、`splitLine.show`、`splitLine.length`、`splitLine.lineStyle.color`、`splitLine.lineStyle.width`、`axisTick.show`、`axisTick.length`、`axisTick.splitNumber`、`axisTick.lineStyle.color`、`axisTick.lineStyle.width`、`axisLabel.show`、`axisLabel.distance`、`axisLabel.rotate`、`axisLabel.color`、`axisLabel.fontSize`、`axisLabel.formatter`、`detail.show`、`detail.color`、`detail.fontSize`、`detail.offsetCenterX`、`detail.offsetCenterY`、`detail.formatter`、`pointer.show`、`pointer.length`、`pointer.width`、`pointer.itemStyle.color`、`pointer.itemStyle.color.auto`、`axisLine.show`、`axisLine.lineStyle.width` ⚠️ 见下方“字段格式说明” |
+
+> **⚠️ `meter180` / `meter360` 字段格式说明（扁平点键，非嵌套对象）**
+>
+> 上面表格里 `axisLine.lineStyle.color`、`splitLine.show` 等带点的字段名**不是嵌套对象**，而是 HMI 渲染器（含拖拽生成器）实际使用的**扁平点键**写法。正确 JSON 形如：
+>
+> ```json
+> {
+>   "type": "meter180",
+>   "value": { "valueType": ["INT"], "variableType": "", "variableName": "", "value": 10 },
+>   "startValue": 0, "endValue": 100, "splitNumber": 5,
+>   "axisLine.show": true,
+>   "axisLine.lineStyle.color": [[0.3, "#67e0e3"], [0.7, "#37a2da"], [1, "#fd666d"]],
+>   "axisLine.lineStyle.width": 1,
+>   "splitLine.show": true, "splitLine.length": 10,
+>   "splitLine.lineStyle.color": "#63677A", "splitLine.lineStyle.width": 3,
+>   "axisTick.show": true, "axisTick.length": 6, "axisTick.splitNumber": 5,
+>   "axisLabel.show": true, "axisLabel.distance": 8,
+>   "detail.show": true, "detail.color": "#464646",
+>   "pointer.show": true, "pointer.length": 60, "pointer.width": 3,
+>   "pointer.itemStyle.color": "#5470c6"
+> }
+> ```
+>
+> **错误写法**（按本表字面意思理解的嵌套对象）会触发崩溃：
+>
+> ```json
+> {
+>   "axisLine": { "show": true, "lineStyle": { "color": [...] } },
+>   "splitLine": { "show": true, "lineStyle": { "color": "..." } }
+> }
+> ```
+>
+> 错误写法下，渲染器拿到 `axisLine` 是普通对象，ECharts gauge 内部按 ECharts model 读取 `axisLine.lineStyle.color` 时取到 `undefined`，首帧 `_renderTitleAndDetail` 抛 `TypeError: Cannot read properties of undefined (reading 'length')`，整图渲染中断、退化为只显示少数 `base:rect` 背景。
+>
+> 经验法则：凡是这一行表格里以**点号开头**或**带点**的字段名（例如 `axisLine.lineStyle.color`），写 JSON 时用**扁平键** `"axisLine.lineStyle.color": <value>`，不要包成 `axisLine: { lineStyle: { color: ... } }`。
+
 | `barDisplay` | `barBackground`、`barColor`、`textColor`、`axisTickWidth`、`axisTickColor`、`interval`、`startValue`、`endValue`、`value`（对象） |
 | `trace` | `color`、`text`、`backgroundColor`、`option` |
 | `xyChart` | `color`、`text`、`backgroundColor`、`option` |
