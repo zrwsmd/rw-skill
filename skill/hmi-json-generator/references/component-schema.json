@@ -625,7 +625,8 @@
       "borderWidth",
       "borderColor",
       "borderRadius",
-      "isClipping"
+      "isClipping",
+      "children"
     ],
     "node:tabView": [
       "type",

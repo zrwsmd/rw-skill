@@ -91,9 +91,20 @@ output: json
    - 状态显示优先使用 `light`、`output`、`progress`、`arc`、仪表等。
    - BOOL 操作优先使用 `button`、`switch`、`checkbox`、`open`、`dipSwitch`、`powerSwitch`。
    - 数值设定优先使用 `input`、`numberInput`、`slider`、`arcSlider`、`potentiometer360`。
-   - 开放工艺路径使用 `base:polyline`；封闭自由图形使用 `base:shape`。
 
-5. 规划布局。
+5. 装配每个节点的 `value` 字段（最容易踩坑的一步）。
+   - **除 `text` 节点外，所有 BOOL 与数值型控件的 `value` 在渲染器中必须为嵌套对象**：
+
+     ```json
+     "value": {
+       "valueType": ["BOOL" | "INT" | "REAL" | "STRING" | ...],
+       "variableType": "BOOL" | "INT" | "REAL" | "STRING" | "",
+       "variableName": "<plc.path>" | "",
+       "value": <number | boolean | string>
+     }
+     ```
+
+6. 规划布局。
    - 优先执行用户明确给出的画布、坐标、尺寸、排列和页面结构。
    - 用户未完整指定布局时，依据 `layout-style.md`、已验证默认值、画布尺寸、功能关系和文字长度自动安排。
    - 严格执行第 2 步已产出的书面设计方案：配色、字体、布局和标志性元素均取自方案；生成中不得临时新增方案之外的颜色、圆角、阴影、字体或动画。
@@ -109,11 +120,14 @@ output: json
    - HTML 页面层空间不足时，使用响应式布局、换行、折叠、分页或明确的内部滚动区域；不得使 HTML 内部关键内容不可读或不可操作。
    - 不得在原生组件层与 HTML 页面层之间进行任何空间协调，包括避让、碰撞计算、遮挡判断、尺寸缩减、留白或区域分割。
 
-6. 处理变量绑定和动态效果。
-   - 严格遵守“变量绑定规则”和“动态效果规则”。
+7. 处理变量绑定和动态效果。
+   - 严格遵守"变量绑定规则"和"动态效果规则"。
+   - 再次确认每个有 `value` 字段的节点都是嵌套对象结构（见步骤 5），是 `text` 的节点没有 `value`。
 
-7. 执行校验。
+8. 执行校验。
    - 先执行 Schema、字段白名单、路径一致性、层级、变量和 HTML 字段校验。
+   - **强制扫描**所有非 `text` 节点的 `value`：必须是对象（含 `valueType`），不得为裸数字 / 裸字符串 / 裸布尔值；不通过则立即修正，禁止输出。
+   - **强制扫描**所有 type 字段：禁用 `rect` / `circle` / `ellipse`（它们在渲染器里会把节点 name 当 label 画出来，产生 `?name?` 多余文字），装饰几何体应改用 `base:rect` / `base:circle` / `base:ellipse`；不通过则立即修正。
    - 再分别执行原生组件层的画布边界、文本可读性、普通元素不重叠、合法工艺重叠和动态元素校验，以及 HTML 页面层的边界、内部可读性、内部交互、内部布局和动态元素校验。
    - 对照第 2 步的书面设计方案逐项复审主题、配色、排版、层级、细节和动效；发现偏离方案的决定时，先修订方案再继续，界面不能只是默认组件堆放或常见 AI 模板换色。
    - 不执行原生组件层与 HTML 页面层之间的避让、包围盒碰撞、遮挡、点击或滚动冲突校验。
@@ -267,14 +281,17 @@ output: json
    - `textColor`、`foregroundColor`
    - `content` 用于 `button`
    - `text` 用于 `text`
-5. 不使用未登记的原生 type，例如：
-   - `rect`
-   - `circle`
-   - `line`
-   - `container`
-   - `group`
-   - `svg`
-   - `path`
+5. 不使用未登记或已被弃用的原生 type：
+
+- `ellipse`
+- `rect`
+- `circle`
+- `line`
+- `container`
+- `group`
+- `svg`
+- `path`
+
 6. 所有组件 ID 全局唯一，默认 `name === id`。
 7. 所有未确认 PLC 变量均为空绑定。
 8. HTML 未读取、订阅、写入、同步或伪造现场 PLC/原生组件变量。
@@ -291,9 +308,9 @@ output: json
     - `segments[0] === 1`
     - 后续 `segments` 均为 `2`
     - `dashFlowDirection` 与 `flowDirection` 仅为 `forward` 或 `backward`
-16. `node:container` 不含 `children`。
+16. `node:container` 渲染器允许 `children`（非强制禁止）。但建议遵循"容器仅作背景"的语义约束，把交互组件与容器并列放在 `graph.children` 中，避免在容器内放交互控件。
 17. `node:tabView.children` 仅含 `node:tab`，且 `currentItem` 是有效索引。
-18. `textarea.textLength === textarea.value.maxLength`。
+18. `textarea.maxLength` 是顶层字段；新生成内容不出现 `textarea.value.textLength` 或 `textarea.textLength` 写法。
 19. `select.value.value` 属于 `options[].value`。
 20. 数值预览值位于对应 `startValue` 和 `endValue` 范围内。
 21. 所有原生动态字段、资源名、方向值和绑定结构均在 `schema.md` 中明确允许。
@@ -308,5 +325,6 @@ output: json
 30. 已在解析需求之后、任何 JSON 之前处理设计方案：默认已产出含九项内容的书面方案；用户明确要求简化或跳过时，已在方案位置如实记录该要求及实际执行的压缩范围。
 31. 最终 JSON 中的每个视觉决定（配色、字体角色、布局分区、标志性元素、持续动画）均可追溯至设计方案；不存在方案之外临时新增的颜色、圆角、阴影、字体或动画。
 32. 若界面呈现 `front-design.md` 所列常见 AI 默认风格特征且用户未要求该风格，判定设计方案失效：返回第 2 步更换方案后重新生成，不得直接输出 JSON。
+33. **每个有 `value` 字段的原生节点（非 `text`），`value` 必须是嵌套对象**（含 `valueType`），不得为裸数字 / 裸字符串 / 裸布尔值；否则渲染器在 `xxx.value` 处抛 `TypeError`，整图变黑。`text` 节点没有 `value` 字段，文本内容用 `content`。
 
 如无法同时满足业务需求、用户要求、布局安全和 Schema，优先输出更简单但完全合法、可渲染且在各自渲染层内不重叠的 JSON。绝不输出猜测字段、猜测 type、猜测 PLC 接口、猜测第三方接口或未经验证的嵌套结构。

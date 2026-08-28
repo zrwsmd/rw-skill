@@ -257,9 +257,8 @@ node:tab.children → 常规组件
 
 规则：
 
-- `node:container` 在已验证示例中仅作为根级背景/边框区域使用。
-- 禁止生成 `node:container.children`。
-- 普通组件必须与容器并列放入 `graph.children`。
+- `node:container` 在已验证示例中**主要**作为根级背景/边框区域使用；普通组件必须与容器并列放入 `graph.children`。
+- **不强制禁止** `node:container.children`：渲染器允许在容器内放置子节点用于逻辑分组（见渲染器默认 demo）。但生成时应优先采用"容器作背景 + 组件并列在 graph.children"的语义，避免在容器内放交互控件导致坐标参考系冲突。
 - 容器应先于覆盖其视觉区域的组件出现，以作为背景层。
 - `node:tabView.children` 只能包含 `node:tab`。
 - `node:tab.children` 可包含常规组件。
@@ -270,37 +269,46 @@ node:tab.children → 常规组件
 
 下表列出每个 type 在通用字段之外允许的专有字段。不得增添其他字段。
 
+**`value` 字段关键说明**：除 `text` 节点不使用 `value` 字段（用 `content` 表达文本）外，下表列出的所有 `value` 字段**在渲染器中必须为嵌套对象**：
+
+```json
+{ "valueType": ["BOOL" | "INT" | "REAL" | ...], "variableType": "BOOL" | "INT" | "REAL" | "STRING" | "", "variableName": "<plc.path>" | "", "value": <number | boolean | string> }
+```
+
+把 `value` 写成裸数字、裸字符串或裸布尔值（如 `value: 182`）会导致渲染器在 `xxx.value` 处抛 `TypeError: Cannot read properties of undefined`，整图变黑。**这是历史 skill 文档与渲染器实际行为不符的最常见根因**。
+
 | type | 专有允许字段 |
 |---|---|
+
 | `base:circle` | `backgroundColor`；`size` 可额外含 `r` |
 | `base:rect` | `backgroundColor` |
 | `base:ellipse` | `backgroundColor`；`size` 可额外含 `r` |
 | `base:sector` | `backgroundColor`、`strokeColor`、`strokeWidth`、`startAngle`、`endAngle` |
 | `base:shape` | 所有路径字段、`pointsSize`、`segments`、`points` |
 | `base:polyline` | 所有路径字段、`pointsSize`、`segments`、`points` |
-| `light` | `value`、`startColor`、`backgroundImage` |
-| `open` | `value`、`rotate`、`backgroundImage`、`event` |
-| `dipSwitch`、`powerSwitch` | `event`、`value`、`backgroundImage` |
-| `button` | `event`、`value`、`text`、`backgroundColor`、`fontColor`、`fontSize`、`selectedBackgroundColor`、`selectedFontColor`、`selectedFontSize`、`borderWidth`、`borderColor`、`borderRadius` |
-| `checkbox` | `event`、`text`、`value`、`borderWidth`、`borderColor`、`borderRadius`、`fontSize`、`fontColor` |
-| `switch` | `event`、`value`、`borderWidth`、`color`、`backgroundColor`、`selectedBackgroundColor`、`controllerColor`、`selectedControllerColor`、`borderColor`、`borderRadius` |
-| `input` | `backgroundColor`、`fontColor`、`borderColor`、`borderWidth`、`borderRadius`、`fontSize`、`value` |
-| `output` | `backgroundColor`、`fontColor`、`borderColor`、`borderWidth`、`borderRadius`、`fontSize`、`textAlign`、`value` |
-| `text` | `color`、`content`、`fontSize`、`borderWidth`、`borderColor`、`borderRadius`、`backgroundColor`、`mode`、`textAlign` |
-| `textarea` | `backgroundColor`、`value`、`borderWidth`、`borderColor`、`borderRadius`、`fontSize`、`fontColor`、`textLength` |
-| `numberInput` | `value`、`intLength`、`decimalLength`、`color`、`fontSize`、`fontColor`、`backgroundColor`、`selectedBackgroundColor`、`selectedFontColor`、`selectedFontSize` |
-| `select` | `value`、`backgroundColor`、`color`、`fontSize`、`fontColor`、`borderColor`、`options` |
-| `slider` | `backgroundColor`、`controllerColor`、`selectedBackgroundColor`、`value`、`startValue`、`endValue`、`fontSize`、`fontColor`、`isShowText` |
-| `progress` | `backgroundColor`、`selectedBackgroundColor`、`value`、`startValue`、`endValue`、`fontSize`、`fontColor`、`isShowText` |
-| `arc` | `value`、`startValue`、`endValue`、`backgroundColor`、`selectedBackgroundColor`、`color`、`fontSize`、`fontColor`、`rotateAngle`、`startAngle`、`endAngle`、`strokeWidth`、`isShowText` |
-| `arcSlider` | `value`、`startValue`、`endValue`、`backgroundColor`、`selectedBackgroundColor`、`fontSize`、`fontColor`、`rotateAngle`、`startAngle`、`endAngle`、`strokeWidth`、`isShowText`、`sliderColor`、`sliderSize` |
-| `potentiometer360` | `value`、`backgroundImage`、`splitNumber`、`startValue`、`endValue`、`pointerIcon` |
-| `meter180`、`meter360` | `radius`、`value`、`startValue`、`endValue`、`splitNumber`、`startAngle`、`endAngle`、`axisLine.lineStyle.color`、`splitLine.show`、`splitLine.length`、`splitLine.lineStyle.color`、`splitLine.lineStyle.width`、`axisTick.show`、`axisTick.length`、`axisTick.splitNumber`、`axisTick.lineStyle.color`、`axisTick.lineStyle.width`、`axisLabel.show`、`axisLabel.distance`、`axisLabel.rotate`、`axisLabel.color`、`axisLabel.fontSize`、`axisLabel.formatter`、`detail.show`、`detail.color`、`detail.fontSize`、`detail.offsetCenterX`、`detail.offsetCenterY`、`detail.formatter`、`pointer.show`、`pointer.length`、`pointer.width`、`pointer.itemStyle.color`、`pointer.itemStyle.color.auto`、`axisLine.show`、`axisLine.lineStyle.width` |
-| `barDisplay` | `barBackground`、`barColor`、`textColor`、`axisTickWidth`、`axisTickColor`、`interval`、`startValue`、`endValue`、`value` |
+| `light` | `value`（对象）、`startColor`、`backgroundImage` |
+| `open` | `value`（对象）、`rotate`、`backgroundImage`、`event` |
+| `dipSwitch`、`powerSwitch` | `event`、`value`（对象）、`backgroundImage` |
+| `button` | `event`、`value`（对象）、`text`、`backgroundColor`、`fontColor`、`fontSize`、`selectedBackgroundColor`、`selectedFontColor`、`selectedFontSize`、`borderWidth`、`borderColor`、`borderRadius` |
+| `checkbox` | `event`、`text`、`value`（对象）、`borderWidth`、`borderColor`、`borderRadius`、`fontSize`、`fontColor` |
+| `switch` | `event`、`value`（对象）、`borderWidth`、`color`、`backgroundColor`、`selectedBackgroundColor`、`controllerColor`、`selectedControllerColor`、`borderColor`、`borderRadius` |
+| `input` | `backgroundColor`、`fontColor`、`borderColor`、`borderWidth`、`borderRadius`、`fontSize`、`value`（对象） |
+| `output` | `backgroundColor`、`fontColor`、`borderColor`、`borderWidth`、`borderRadius`、`fontSize`、`textAlign`、`value`（对象） |
+| `text` | `color`、`content`、`fontSize`、`borderWidth`、`borderColor`、`borderRadius`、`backgroundColor`、`mode`、`textAlign`（**没有 `value` 字段**） |
+| `textarea` | `backgroundColor`、`value`（对象，含 STRING valueType）、`borderWidth`、`borderColor`、`borderRadius`、`fontSize`、`color`（注意：颜色字段是 `color`，**不是** `fontColor`）、`maxLength`（**顶层字段**，**不是** `value.textLength`） |
+| `numberInput` | `value`（对象）、`intLength`、`decimalLength`、`color`、`fontSize`、`fontColor`、`backgroundColor`、`selectedBackgroundColor`、`selectedFontColor`、`selectedFontSize` |
+| `select` | `value`（对象）、`backgroundColor`、`color`、`fontSize`、`fontColor`、`borderColor`、`options`（每项 `{label, value}`，**不要**用 `name`） |
+| `slider` | `backgroundColor`、`controllerColor`、`selectedBackgroundColor`、`value`（对象）、`startValue`、`endValue`、`fontSize`、`fontColor`、`isShowText` |
+| `progress` | `backgroundColor`、`controllerColor`、`selectedBackgroundColor`、`value`（对象）、`startValue`、`endValue`、`fontSize`、`fontColor`、`isShowText` |
+| `arc` | `value`（对象）、`startValue`、`endValue`、`backgroundColor`、`selectedBackgroundColor`、`color`、`fontSize`、`fontColor`、`rotateAngle`、`startAngle`、`endAngle`、`strokeWidth`、`isShowText` |
+| `arcSlider` | `value`（对象）、`startValue`、`endValue`、`backgroundColor`、`selectedBackgroundColor`、`fontSize`、`fontColor`、`rotateAngle`、`startAngle`、`endAngle`、`strokeWidth`、`isShowText`、`sliderColor`、`sliderSize` |
+| `potentiometer360` | `value`（对象）、`backgroundImage`、`splitNumber`、`startValue`、`endValue`、`pointerIcon` |
+| `meter180`、`meter360` | `radius`、`value`（对象）、`startValue`、`endValue`、`splitNumber`、`startAngle`、`endAngle`、`axisLine.lineStyle.color`、`splitLine.show`、`splitLine.length`、`splitLine.lineStyle.color`、`splitLine.lineStyle.width`、`axisTick.show`、`axisTick.length`、`axisTick.splitNumber`、`axisTick.lineStyle.color`、`axisTick.lineStyle.width`、`axisLabel.show`、`axisLabel.distance`、`axisLabel.rotate`、`axisLabel.color`、`axisLabel.fontSize`、`axisLabel.formatter`、`detail.show`、`detail.color`、`detail.fontSize`、`detail.offsetCenterX`、`detail.offsetCenterY`、`detail.formatter`、`pointer.show`、`pointer.length`、`pointer.width`、`pointer.itemStyle.color`、`pointer.itemStyle.color.auto`、`axisLine.show`、`axisLine.lineStyle.width` |
+| `barDisplay` | `barBackground`、`barColor`、`textColor`、`axisTickWidth`、`axisTickColor`、`interval`、`startValue`、`endValue`、`value`（对象） |
 | `trace` | `color`、`text`、`backgroundColor`、`option` |
 | `xyChart` | `color`、`text`、`backgroundColor`、`option` |
 | `table` | `backgroundColor`、`fontSize`、`fontColor`、`borderWidth`、`borderColor`、`rowData` |
-| `node:container` | `backgroundColor`、`borderWidth`、`borderColor`、`borderRadius`、`isClipping` |
+| `node:container` | `backgroundColor`、`borderWidth`、`borderColor`、`borderRadius`、`isClipping`、`children`（可选，渲染器允许） |
 | `node:tabView` | `backgroundColor`、`currentItem`、`borderWidth`、`borderColor`、`children` |
 | `node:tab` | `type`、`id`、`name`、`titleText`、`visible`、`children` |
 

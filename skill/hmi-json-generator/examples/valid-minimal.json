@@ -296,6 +296,95 @@
         "x": 160,
         "y": 394
       }
+    },
+    {
+      "type": "arc",
+      "id": "arc_speed",
+      "name": "arc_speed",
+      "visible": true,
+      "size": {
+        "width": 220,
+        "height": 120
+      },
+      "value": {
+        "valueType": ["INT"],
+        "variableType": "INT",
+        "variableName": "",
+        "value": 60
+      },
+      "startValue": 0,
+      "endValue": 100,
+      "backgroundColor": "#ffffff",
+      "selectedBackgroundColor": "#ffffff",
+      "color": "#409eff",
+      "fontSize": 12,
+      "fontColor": "#333333",
+      "rotateAngle": 0,
+      "startAngle": 180,
+      "endAngle": 360,
+      "strokeWidth": 6,
+      "isShowText": true,
+      "position": {
+        "x": 500,
+        "y": 440
+      }
+    },
+    {
+      "type": "textarea",
+      "id": "textarea_log",
+      "name": "textarea_log",
+      "visible": true,
+      "size": {
+        "width": 220,
+        "height": 80
+      },
+      "backgroundColor": "#ffffff",
+      "value": {
+        "valueType": ["STRING"],
+        "variableType": "STRING",
+        "variableName": "",
+        "value": "运行日志\n[12:00] 启动\n[12:01] 速度达到 1.6 m/s"
+      },
+      "borderWidth": 1,
+      "borderColor": "#cccccc",
+      "borderRadius": 4,
+      "fontSize": 12,
+      "color": "#333333",
+      "maxLength": 500,
+      "position": {
+        "x": 500,
+        "y": 180
+      }
+    },
+    {
+      "type": "select",
+      "id": "select_mode",
+      "name": "select_mode",
+      "visible": true,
+      "size": {
+        "width": 180,
+        "height": 28
+      },
+      "value": {
+        "valueType": ["STRING"],
+        "variableType": "STRING",
+        "variableName": "",
+        "value": "auto"
+      },
+      "backgroundColor": "#ffffff",
+      "color": "#333333",
+      "fontSize": 12,
+      "fontColor": "#333333",
+      "borderColor": "#cccccc",
+      "options": [
+        { "label": "自动运行", "value": "auto" },
+        { "label": "手动模式", "value": "manual" },
+        { "label": "维护模式", "value": "service" }
+      ],
+      "position": {
+        "x": 500,
+        "y": 290
+      }
     }
   ],
   "htmlCode": {
