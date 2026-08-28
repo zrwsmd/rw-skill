@@ -8,11 +8,12 @@
 - `references/schema.md`：唯一权威 HMI JSON Schema；定义根节点、字段白名单、组件类型、嵌套、绑定、路径、资源与 HTML 协议。
 - `references/component-schema.json`：供程序读取的机器可读约束，包括根字段、组件字段、嵌套、绑定、资源和路径规则。
 - `references/layout-style.md`：各渲染层自身的画布边界、组件对齐、合法工艺重叠和布局规则，以及禁止跨层空间协调的约束。
+- `references/front-design.md`：界面美学方向与生成门禁：主题提炼、配色、字体、布局、标志性元素、动效、AI 默认风格回避与设计复审。
 - `examples/valid-minimal.json`：可渲染的最小示例。
 
 ## 使用原则
 
-1. 先阅读 `SKILL.md`，根据需求选择原生组件、HTML 或混合页面实现。
+1. 先阅读 `SKILL.md`：默认先产出书面设计方案再生成；用户明确要求不过度设计或快速出图时，可按其要求压缩或跳过设计方案。根据需求选择原生组件、HTML 或混合页面实现。
 2. 所有输出 JSON 必须以 `references/schema.md` 为最终依据。
 3. 字段白名单、组件类型、层级关系、变量绑定、路径约束和资源名必须符合 `references/component-schema.json`。
 4. 原生组件层与 HTML 层必须分别在假设另一层不存在的前提下生成；各层内部的位置、边界、文字可读性和重叠必须符合 `references/layout-style.md`，不得进行跨层分区或避让。
